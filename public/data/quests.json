@@ -1,0 +1,8 @@
+{
+  "test_quest_verification": {
+    "id": "test_quest_verification",
+    "title": "Verificação Técnica Provisória",
+    "description": "Módulo de teste de ciclo de vida de missões.",
+    "status": "active"
+  }
+}

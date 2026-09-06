@@ -1,0 +1,18 @@
+{
+  "test_item_heal": {
+    "id": "test_item_heal",
+    "name": "TestItem (Recuperação)",
+    "type": "consumable",
+    "value": 20,
+    "healHp": 40,
+    "description": "Item de teste para recuperação provisória de pontos de vida."
+  },
+  "test_item_resource": {
+    "id": "test_item_resource",
+    "name": "TestItem (Recurso)",
+    "type": "consumable",
+    "value": 15,
+    "addResource": 30,
+    "description": "Item de teste para incremento provisório de recurso."
+  }
+}
