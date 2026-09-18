@@ -4,6 +4,7 @@ import { PreloadScene } from '../scenes/PreloadScene';
 import { MainMenuScene } from '../scenes/MainMenuScene';
 import { TechnicalSandboxScene } from '../scenes/TechnicalSandboxScene';
 import { BattlePrototypeScene } from '../scenes/BattlePrototypeScene';
+import { AssetGalleryScene } from '../scenes/AssetGalleryScene';
 import { LOGICAL_WIDTH, LOGICAL_HEIGHT } from './pixelScale';
 
 /**
@@ -35,6 +36,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     PreloadScene,
     MainMenuScene,
     TechnicalSandboxScene,
-    BattlePrototypeScene
+    BattlePrototypeScene,
+    AssetGalleryScene
   ]
 };

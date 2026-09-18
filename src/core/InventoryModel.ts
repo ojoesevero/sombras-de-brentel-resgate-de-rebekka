@@ -1,14 +1,11 @@
 import { Combatant } from './Combatant';
-import { TestItemDefinition, ItemsDataMap } from '../types/game.types';
+import {
+  ItemsDataMap,
+  InventoryItemRecord,
+  SerializedInventory
+} from '../types/game.types';
 
-export interface InventoryItemRecord extends TestItemDefinition {
-  quantity: number;
-}
-
-export interface SerializedInventory {
-  gold: number;
-  items: InventoryItemRecord[];
-}
+export type { InventoryItemRecord, SerializedInventory };
 
 /**
  * [INFRAESTRUTURA EXPERIMENTAL]

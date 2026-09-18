@@ -2,12 +2,14 @@ import Phaser from 'phaser';
 import { BaseScene } from './BaseScene';
 import { Combatant } from '../core/Combatant';
 import { TurnEngine } from '../core/TurnEngine';
+import { InventoryModel } from '../core/InventoryModel';
 import { InputService, GameAction } from '../services/InputService';
 import {
   BattleState,
   TurnAction,
   SceneTransitionData,
-  PROVISIONAL_BALANCE
+  PROVISIONAL_BALANCE,
+  QuestsDataMap
 } from '../types/game.types';
 
 interface EnemyVisualRecord {
@@ -24,11 +26,14 @@ interface ActionButton {
 }
 
 /**
- * BattlePrototypeScene: Arena provisória de combate por turnos em TypeScript.
- * Interface navegável 100% por teclado com seleção direcional de alvos.
+ * BattlePrototypeScene: Arena de combate por turnos em TypeScript integrada
+ * com modelo de inventário real, custos de recurso e transporte de dados.
  */
 export class BattlePrototypeScene extends BaseScene {
   private player!: Combatant;
+  private inventory!: InventoryModel;
+  private questsData: QuestsDataMap | null = null;
+  private spawnPoint: { x: number; y: number } = { x: 395, y: 135 };
   private enemies: Combatant[] = [];
   private turnEngine!: TurnEngine;
   private inputService: InputService | null = null;
@@ -39,12 +44,13 @@ export class BattlePrototypeScene extends BaseScene {
   private enemyVisuals: EnemyVisualRecord[] = [];
   private targetCursor!: Phaser.GameObjects.Sprite;
   private actionButtons: Phaser.GameObjects.Text[] = [];
+  private actionHelpText!: Phaser.GameObjects.Text;
   private logText!: Phaser.GameObjects.Text;
 
   private actions: ActionButton[] = [
-    { id: 'attack', label: '1. Ataque Básico' },
-    { id: 'skill', label: `2. TechnicalSkill (${PROVISIONAL_BALANCE.RESOURCE_COST_SKILL} Recurso)` },
-    { id: 'item', label: '3. TestItem (+40 HP)' },
+    { id: 'attack', label: '1. Atacar' },
+    { id: 'skill', label: `2. Técnica (${PROVISIONAL_BALANCE.RESOURCE_COST_SKILL}R)` },
+    { id: 'item', label: '3. Poção' },
     { id: 'defend', label: '4. Defender' },
     { id: 'flee', label: '5. Fugir' }
   ];
@@ -67,6 +73,21 @@ export class BattlePrototypeScene extends BaseScene {
 
     if (data?.playerData) {
       this.player.loadState(data.playerData);
+    }
+
+    if (data?.inventoryData) {
+      this.inventory = new InventoryModel(data.inventoryData);
+    } else {
+      this.inventory = new InventoryModel();
+      this.inventory.addItem('test_item_heal', 2);
+    }
+
+    if (data?.questsData) {
+      this.questsData = data.questsData;
+    }
+
+    if (data?.spawnPoint) {
+      this.spawnPoint = data.spawnPoint;
     }
 
     this.enemies = [
@@ -99,6 +120,12 @@ export class BattlePrototypeScene extends BaseScene {
     this.initBaseCamera();
     this.cameras.main.setBackgroundColor(0x0e0e1a);
 
+    // Fundo Cenográfico Real da Arena dos Centuriões
+    if (this.textures.exists('bg_arena_centurion')) {
+      this.add.image(240, 135, 'bg_arena_centurion').setDisplaySize(480, 270).setDepth(-10);
+      this.add.rectangle(240, 135, 480, 270, 0x070714, 0.48).setDepth(-9);
+    }
+
     this._createVisuals();
     this._createUI();
     this._setupInput();
@@ -108,49 +135,83 @@ export class BattlePrototypeScene extends BaseScene {
     // Linha divisória de arena
     this.add.rectangle(240, 180, 460, 2, 0x333355);
 
+    // Retrato de Batalha de Rhogar
+    if (this.textures.exists('portrait_rhogar')) {
+      this.add.rectangle(45, 115, 60, 40, 0x050814, 0.9).setStrokeStyle(1, 0xd4af37);
+      this.add.image(45, 115, 'portrait_rhogar').setDisplaySize(58, 38);
+    }
+
     // Sprite e Stats do Jogador (Lado Esquerdo)
-    this.add.sprite(90, 120, 'spr_player_dummy').setScale(2);
-    this.add.text(90, 80, this.player.name, {
-      fontFamily: 'monospace',
-      fontSize: '8px',
+    const pKey = this.textures.exists('spr_rhogar_front') ? 'spr_rhogar_front' : 'spr_player_dummy';
+    const pSprite = this.add.sprite(105, 128, pKey);
+    if (this.textures.exists('spr_rhogar_front')) {
+      pSprite.setDisplaySize(28, 30);
+    } else {
+      pSprite.setScale(2);
+    }
+    this.add.text(105, 78, this.player.name, {
+      fontFamily: '"Outfit", sans-serif',
+      fontSize: '9px',
       color: '#00ffff',
-      fontStyle: 'bold'
+      fontStyle: 'bold',
+      resolution: 3,
+      stroke: '#000000',
+      strokeThickness: 2
     }).setOrigin(0.5);
 
-    this.playerHpText = this.add.text(90, 93, `HP: ${this.player.hp}/${this.player.maxHp}`, {
-      fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#00ff00'
+    this.playerHpText = this.add.text(105, 91, `HP: ${this.player.hp}/${this.player.maxHp}`, {
+      fontFamily: '"Outfit", sans-serif',
+      fontSize: '8px',
+      color: '#00ff88',
+      resolution: 3,
+      stroke: '#000000',
+      strokeThickness: 1.5
     }).setOrigin(0.5);
 
     this.playerResourceText = this.add.text(
-      90,
-      104,
-      `TestResource: ${this.player.resource}/${this.player.maxResource}`,
+      105,
+      103,
+      `Recurso: ${this.player.resource}/${this.player.maxResource}`,
       {
-        fontFamily: 'monospace',
-        fontSize: '7px',
-        color: '#ffaa00'
+        fontFamily: '"Outfit", sans-serif',
+        fontSize: '8px',
+        color: '#ffaa00',
+        resolution: 3,
+        stroke: '#000000',
+        strokeThickness: 1.5
       }
     ).setOrigin(0.5);
 
-    // Sprites e Stats dos Alvos de Treinamento (Lado Direito)
+    // Sprites e Stats dos Alvos / Gladiadores (Lado Direito)
     this.enemyVisuals = [];
-    const positions = [{ x: 330, y: 100 }, { x: 400, y: 130 }];
+    const positions = [{ x: 330, y: 110 }, { x: 400, y: 135 }];
+    const eKey = this.textures.exists('spr_gladiador_front') ? 'spr_gladiador_front' : 'spr_training_target';
 
     this.enemies.forEach((enemy, i) => {
       const pos = positions[i];
-      const sprite = this.add.sprite(pos.x, pos.y, 'spr_training_target').setScale(2);
-      const nameText = this.add.text(pos.x, pos.y - 32, enemy.name, {
-        fontFamily: 'monospace',
-        fontSize: '7px',
-        color: '#ff6666'
+      const sprite = this.add.sprite(pos.x, pos.y, eKey);
+      if (this.textures.exists('spr_gladiador_front')) {
+        sprite.setDisplaySize(28, 34);
+      } else {
+        sprite.setScale(2);
+      }
+      const nameText = this.add.text(pos.x, pos.y - 28, enemy.name, {
+        fontFamily: '"Outfit", sans-serif',
+        fontSize: '8px',
+        fontStyle: 'bold',
+        color: '#ff7777',
+        resolution: 3,
+        stroke: '#000000',
+        strokeThickness: 2
       }).setOrigin(0.5);
 
-      const hpText = this.add.text(pos.x, pos.y - 20, `HP: ${enemy.hp}/${enemy.maxHp}`, {
-        fontFamily: 'monospace',
-        fontSize: '7px',
-        color: '#ff9999'
+      const hpText = this.add.text(pos.x, pos.y - 18, `HP: ${enemy.hp}/${enemy.maxHp}`, {
+        fontFamily: '"Outfit", sans-serif',
+        fontSize: '8px',
+        color: '#ffaaaa',
+        resolution: 3,
+        stroke: '#000000',
+        strokeThickness: 1.5
       }).setOrigin(0.5);
 
       this.enemyVisuals.push({ sprite, nameText, hpText, x: pos.x, y: pos.y });
@@ -161,26 +222,39 @@ export class BattlePrototypeScene extends BaseScene {
   }
 
   private _createUI(): void {
-    // Painel de Ações
-    this.add.rectangle(240, 225, 460, 56, 0x0a0a14).setStrokeStyle(1, 0x333355);
+    // Painel de Ações Elegante com fundo escuro e borda suave
+    this.add.rectangle(240, 226, 464, 62, 0x080914, 0.95).setStrokeStyle(1.5, 0x223355);
     this.actionButtons = [];
 
-    const startX = 25;
-    const spacingX = 90;
+    const buttonPositionsX = [32, 116, 206, 296, 386];
 
     this.actions.forEach((act, idx) => {
-      const t = this.add.text(startX + idx * spacingX, 225, act.label, {
-        fontFamily: 'monospace',
-        fontSize: '7px',
+      const t = this.add.text(buttonPositionsX[idx], 214, act.label, {
+        fontFamily: '"Outfit", sans-serif',
+        fontSize: '9px',
+        fontStyle: '600',
+        resolution: 3,
         color: '#8888aa'
       }).setOrigin(0, 0.5);
       this.actionButtons.push(t);
     });
 
+    this.actionHelpText = this.add.text(240, 238, '', {
+      fontFamily: '"Outfit", sans-serif',
+      fontSize: '8px',
+      resolution: 3,
+      color: '#aaccff',
+      align: 'center'
+    }).setOrigin(0.5);
+
     this.logText = this.add.text(240, 22, 'TURNO DO JOGADOR: Selecione a ação.', {
-      fontFamily: 'monospace',
-      fontSize: '7px',
-      color: '#ffd700'
+      fontFamily: '"Outfit", sans-serif',
+      fontSize: '9px',
+      fontStyle: 'bold',
+      resolution: 3,
+      color: '#ffd700',
+      stroke: '#000000',
+      strokeThickness: 2
     }).setOrigin(0.5);
 
     this._updateVisualSelection();
@@ -226,12 +300,38 @@ export class BattlePrototypeScene extends BaseScene {
         this.logText.setText('Seleção de alvo cancelada.');
         this._updateVisualSelection();
       } else {
-        this.scene.start('TechnicalSandboxScene');
+        const returnPayload: SceneTransitionData = {
+          playerData: this.player.getState(),
+          inventoryData: this.inventory.serialize(),
+          questsData: this.questsData,
+          spawnPoint: this.spawnPoint
+        };
+        this.scene.start('TechnicalSandboxScene', returnPayload);
       }
     });
   }
 
   private _updateVisualSelection(): void {
+    const healCount = this.inventory.getItemCount('test_item_heal');
+    if (this.actions[2]) {
+      this.actions[2].label = `3. Poção (x${healCount})`;
+      if (this.actionButtons[2]) {
+        this.actionButtons[2].setText(this.actions[2].label);
+      }
+    }
+
+    const helpDescriptions = [
+      '1. Atacar: Golpe físico direto com maça de guerra causando dano padrão.',
+      `2. Técnica: Golpe concentrado devastador (Custo: ${PROVISIONAL_BALANCE.RESOURCE_COST_SKILL} Recurso).`,
+      `3. Poção de Cura: Restaura 40 HP imediatamente (Disponíveis: ${healCount}).`,
+      '4. Defender: Assume postura defensiva (+15 Recurso e menor dano sofrido).',
+      '5. Fugir: Recuo tático imediato de volta à Taverna Cauda do Dragão.'
+    ];
+
+    if (this.actionHelpText) {
+      this.actionHelpText.setText(helpDescriptions[this.selectedActionIndex] || '');
+    }
+
     this.actionButtons.forEach((btn, i) => {
       if (i === this.selectedActionIndex && !this.isTargeting) {
         btn.setColor('#00ffff');
@@ -273,6 +373,11 @@ export class BattlePrototypeScene extends BaseScene {
       this._changeTarget(0);
       this.logText.setText('Selecione o alvo com [Setas Esquerda/Direita] e confirme [Z/Enter].');
     } else if (action === 'item') {
+      if (!this.inventory.hasItem('test_item_heal', 1)) {
+        this._flashFeedback('Sem Poções de Cura no inventário!');
+        return;
+      }
+      this.inventory.removeItem('test_item_heal', 1);
       this._executePlayerTurn('item');
     } else if (action === 'defend') {
       this._executePlayerTurn('defend');
@@ -293,6 +398,7 @@ export class BattlePrototypeScene extends BaseScene {
     const result = this.turnEngine.executePlayerAction(action, payload);
 
     this._updateHpAndStats();
+    this._updateVisualSelection();
 
     if (result.damage !== undefined) {
       const targetVis = this.enemyVisuals[this.selectedEnemyIndex];
@@ -305,14 +411,28 @@ export class BattlePrototypeScene extends BaseScene {
     }
 
     if (result.battleState === BattleState.VICTORY) {
-      this.logText.setText('VITÓRIA TÉCNICA: Alvos de treinamento neutralizados. Retornando...');
-      this.time.delayedCall(1800, () => this.scene.start('TechnicalSandboxScene'));
+      this.inventory.gold += 30;
+      this.inventory.addItem('test_item_heal', 1);
+      this.logText.setText('VITÓRIA TÉCNICA: Alvos neutralizados! (+30 ouro, +1 Poção). Retornando...');
+      const returnPayload: SceneTransitionData = {
+        playerData: this.player.getState(),
+        inventoryData: this.inventory.serialize(),
+        questsData: this.questsData,
+        spawnPoint: this.spawnPoint
+      };
+      this.time.delayedCall(1900, () => this.scene.start('TechnicalSandboxScene', returnPayload));
       return;
     }
 
     if (result.battleState === BattleState.FLED) {
       this.logText.setText('Recuo tático executado com sucesso.');
-      this.time.delayedCall(1000, () => this.scene.start('TechnicalSandboxScene'));
+      const returnPayload: SceneTransitionData = {
+        playerData: this.player.getState(),
+        inventoryData: this.inventory.serialize(),
+        questsData: this.questsData,
+        spawnPoint: this.spawnPoint
+      };
+      this.time.delayedCall(1000, () => this.scene.start('TechnicalSandboxScene', returnPayload));
       return;
     }
 
@@ -361,10 +481,13 @@ export class BattlePrototypeScene extends BaseScene {
 
   private _showFloatingText(x: number, y: number, text: string, color: string): void {
     const t = this.add.text(x, y - 8, text, {
-      fontFamily: 'monospace',
-      fontSize: '8px',
+      fontFamily: '"Outfit", sans-serif',
+      fontSize: '10px',
       color,
-      fontStyle: 'bold'
+      fontStyle: 'bold',
+      resolution: 3,
+      stroke: '#000000',
+      strokeThickness: 2
     }).setOrigin(0.5);
 
     this.tweens.add({

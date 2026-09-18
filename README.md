@@ -79,6 +79,14 @@ Esta versão provê um ambiente técnico neutro e executável, validando:
       <td><strong>🧪 Regras de Domínio Puras</strong></td>
       <td>Regras de combate, inventário e missões totalmente isoladas do Phaser e do DOM, com <strong>100% de cobertura por testes automatizados</strong>.</td>
     </tr>
+    <tr>
+      <td><strong>💾 Persistência & Savegame</strong></td>
+      <td>Persistência desacoplada em Base64 com suporte UTF-8 via Runa de Salvamento no mapa e opção dinâmica de continuar no menu principal.</td>
+    </tr>
+    <tr>
+      <td><strong>🎒 Inventário & Missões</strong></td>
+      <td>Gestão de ouro, poções com consumo e débito real em combate e progressão de objetivos integrada ao HUD.</td>
+    </tr>
   </tbody>
 </table>
 
@@ -91,32 +99,30 @@ A base segue uma arquitetura em **4 camadas desacopladas** com tipagem estrita (
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ 1. CAMADA DE DOMÍNIO (Pure TypeScript - 100% Coberta por Testes)            │
-│    • Combatant.ts   : Atributos, HP, mitigação de dano, recurso e ataques   │
-│    • TurnEngine.ts  : FSM de combate em turnos, fila de ações e vitória     │
-│    [Infraestrutura Experimental Desconectada]:                              │
-│    • InventoryModel.ts : Gestão de itens, ouro e consumo                    │
+│    • Combatant.ts      : Atributos, HP, mitigação de dano, recurso e ataques│
+│    • TurnEngine.ts     : FSM de combate em turnos, fila de ações e vitória  │
+│    • InventoryModel.ts : Gestão de itens, ouro, consumo e estoque           │
 │    • QuestGraph.ts     : Grafo de status de missões (locked/active/done)    │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 2. CAMADA DE SERVIÇOS & APLICAÇÃO                                           │
 │    • InputService.ts : Mapeamento unificado de teclado e eventos            │
 │    • EventBus.ts     : Barramento desacoplado com generics estritos         │
 │    • AudioService.ts : Efeitos sonoros sintéticos via Web Audio             │
-│    [Infraestrutura Experimental Desconectada]:                              │
 │    • SaveService.ts  : Persistência Base64 com suporte UTF-8/LocalStorage   │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 3. CAMADA DE APRESENTAÇÃO (Phaser 3)                                        │
 │    • BaseScene.ts              : Configuração padrão de câmera (roundPixels)│
-│    • BootScene / PreloadScene  : Ciclo de vida e assets procedurais         │
-│    • MainMenuScene.ts          : Menu retro 100% navegável por teclado      │
-│    • TechnicalSandboxScene.ts  : Sandbox de exploração top-down e NPCs      │
-│    • BattlePrototypeScene.ts   : Arena de batalha por turnos                │
+│    • BootScene / PreloadScene  : Ciclo de vida, JSONs e texturas procedurais│
+│    • MainMenuScene.ts          : Menu retro com detecção dinâmica de Save   │
+│    • TechnicalSandboxScene.ts  : Sandbox top-down, HUD, Runa de Salvar e NPC│
+│    • BattlePrototypeScene.ts   : Arena de batalha com consumo de inventário │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ 4. DADOS DATA-DRIVEN (public/data/)                                         │
 │    • items.json • enemies.json • dialogues.json • quests.json • maps.json   │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-> 🔒 **Módulos Experimentais Isolados:** Os módulos `InventoryModel`, `QuestGraph` e `SaveService` estão totalmente testados e prontos, mas permanecem intencionalmente desconectados do loop de gameplay das cenas até a integração da fase narrativa.
+> 🌟 **Sistemas Conectados ao Gameplay:** Os módulos `InventoryModel`, `QuestGraph` e `SaveService` estão totalmente integrados ao loop de exploração e batalha, permitindo salvar progresso, consumir poções e avançar missões.
 
 ---
 
@@ -295,11 +301,11 @@ npm test && npm run typecheck && npm run build
 
 ## 🗺️ Próximas Etapas (Roadmap)
 
+- [x] Conexão dos módulos de Inventário, Grafo de Missões e Persistência (Savegame) ao fluxo jogável.
 - [ ] Validação de gameplay da exploração e combate em múltiplos dispositivos/resoluções.
 - [ ] Documentação do roteiro canônico da chegada de Rhogar à Taverna.
 - [ ] Construção do mapa final da Taverna de Rastphen em Tilemap.
 - [ ] Implementação da cena de flashback da **Arena de Centúrion** como tutorial de combate.
-- [ ] Conexão progressiva dos módulos de Inventário e Grafo de Missões ao fluxo jogável.
 - [ ] Desenvolvimento da expedição e narrativa do Resgate de Rebekka.
 
 ---

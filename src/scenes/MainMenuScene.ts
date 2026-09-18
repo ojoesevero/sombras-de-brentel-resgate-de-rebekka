@@ -1,5 +1,8 @@
 import { BaseScene } from './BaseScene';
 import { InputService, GameAction } from '../services/InputService';
+import { globalSaveService } from '../services/SaveService';
+import { GsapBattleArena } from '../combat-gsap/GsapBattleArena';
+import { TavernHub } from '../tavern-gsap/TavernHub';
 
 interface MenuOption {
   text: string;
@@ -9,6 +12,7 @@ interface MenuOption {
 
 /**
  * MainMenuScene: Menu principal retro em TypeScript navegável 100% por teclado.
+ * Suporta detecção dinâmica de savegame e inicialização de novo jogo.
  */
 export class MainMenuScene extends BaseScene {
   private options: MenuOption[] = [];
@@ -25,47 +29,80 @@ export class MainMenuScene extends BaseScene {
     this.initBaseCamera();
     this.cameras.main.setBackgroundColor(0x0a0a14);
 
-    // Título Principal
-    this.add.text(240, 45, 'SOMBRAS DE BRENTEL', {
-      fontFamily: 'monospace',
-      fontSize: '18px',
+    // Fundo Cenográfico Real (Cidade de Rastphen) com Overlay Atmosférico
+    if (this.textures.exists('bg_cidade_rastphen')) {
+      this.add.image(240, 135, 'bg_cidade_rastphen').setDisplaySize(480, 270).setDepth(-10);
+      this.add.rectangle(240, 135, 480, 270, 0x050814, 0.72).setDepth(-9);
+    }
+
+    // Título Principal com Fonte Cinzel Épica
+    this.add.text(240, 36, 'SOMBRAS DE BRENTEL', {
+      fontFamily: '"Cinzel", serif',
+      fontSize: '20px',
+      resolution: 3,
       color: '#ffd700',
+      stroke: '#000000',
+      strokeThickness: 3,
       fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    this.add.text(240, 68, 'Fundação Técnica - Protótipo Mínimo', {
-      fontFamily: 'monospace',
+    this.add.text(240, 58, 'O Resgate de Rebekka - RPG Tático (v0.3.5)', {
+      fontFamily: '"Outfit", sans-serif',
       fontSize: '9px',
-      color: '#8888aa'
+      resolution: 3,
+      color: '#b0c0d8',
+      stroke: '#000000',
+      strokeThickness: 1.5
     }).setOrigin(0.5);
 
-    // Menu de opções técnicas
-    this.options = [
-      { text: '1. Sandbox de Exploração Técnica (Top-Down)', scene: 'TechnicalSandboxScene' },
-      { text: '2. Arena de Combate por Turnos (Batalha)', scene: 'BattlePrototypeScene' },
-      { text: '3. Status dos Sistemas Técnicos', action: () => this._showSystemStatus() }
-    ];
+    // Constrói menu dinamicamente dependendo da existência de Save
+    this.options = [];
+    const hasSave = globalSaveService.hasSave();
+
+    if (hasSave) {
+      this.options.push({
+        text: '► Continuar Jogo Salvo',
+        action: () => this._continueSavedGame()
+      });
+    }
+
+    this.options.push(
+      { text: hasSave ? '1. Retornar à Taverna [GSAP]' : '1. Nova Aventura: Taverna Cauda do Dragão [GSAP]', action: () => this._startTavernHub() },
+      { text: '2. Arena de Combate por Turnos (Phaser)', scene: 'BattlePrototypeScene' },
+      { text: '3. Arena Estilizada GSAP + CSS3 [PROTÓTIPO]', action: () => this._startGsapBattle() },
+      { text: '4. Galeria de Assets (28 Imagens)', scene: 'AssetGalleryScene' },
+      { text: '5. Status dos Sistemas Técnicos', action: () => this._showSystemStatus() }
+    );
 
     this.selectedIndex = 0;
     this.optionTexts = [];
 
+    const startY = 88;
+    const spacingY = 22;
+
     this.options.forEach((opt, idx) => {
-      const t = this.add.text(240, 120 + idx * 24, opt.text, {
-        fontFamily: 'monospace',
-        fontSize: '10px',
-        color: '#8888aa'
+      const t = this.add.text(240, startY + idx * spacingY, opt.text, {
+        fontFamily: '"Outfit", sans-serif',
+        fontSize: '11px',
+        resolution: 3,
+        color: '#8888aa',
+        stroke: '#000000',
+        strokeThickness: 2
       }).setOrigin(0.5);
       this.optionTexts.push(t);
     });
 
     this.statusText = this.add.text(
       240,
-      235,
-      'Controles: [W/S/Setas] Navegar | [Z/Enter/Espaço] Confirmar | [1/2] Atalhos',
+      245,
+      'Controles: [W/S/Setas] Navegar | [Z/Enter/Espaço] Confirmar | [1-4] Atalhos',
       {
-        fontFamily: 'monospace',
-        fontSize: '8px',
-        color: '#555577'
+        fontFamily: '"Outfit", sans-serif',
+        fontSize: '9px',
+        resolution: 3,
+        color: '#8899aa',
+        stroke: '#000000',
+        strokeThickness: 1.5
       }
     ).setOrigin(0.5);
 
@@ -90,12 +127,31 @@ export class MainMenuScene extends BaseScene {
     });
 
     this.inputService.on(GameAction.ACTION_1, () => {
-      this.scene.start('TechnicalSandboxScene');
+      this._startTavernHub();
     });
 
     this.inputService.on(GameAction.ACTION_2, () => {
       this.scene.start('BattlePrototypeScene');
     });
+
+    if (this.input.keyboard) {
+      const keyOne = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE);
+      keyOne.on('down', () => {
+        this._startTavernHub();
+      });
+      const keyThree = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE);
+      keyThree.on('down', () => {
+        this._startGsapBattle();
+      });
+      const keyFour = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
+      keyFour.on('down', () => {
+        this.scene.start('AssetGalleryScene');
+      });
+      const keyG = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
+      keyG.on('down', () => {
+        this.scene.start('AssetGalleryScene');
+      });
+    }
   }
 
   private _updateVisuals(): void {
@@ -119,16 +175,48 @@ export class MainMenuScene extends BaseScene {
     }
   }
 
+  private _continueSavedGame(): void {
+    this._startTavernHub();
+  }
+
   private _showSystemStatus(): void {
     if (this.statusText) {
-      this.statusText.setText('Sistemas: Resolução 480x270 | Integer Scale Ativo | TypeScript Estrito');
+      this.statusText.setText('Sistemas: Resolução Nativa | SaveService + Inventory + Quests Ativos');
       this.statusText.setColor('#00ff00');
       this.time.delayedCall(2500, () => {
         if (this.statusText) {
-          this.statusText.setText('Controles: [W/S/Setas] Navegar | [Z/Enter/Espaço] Confirmar | [1/2] Atalhos');
+          this.statusText.setText('Controles: [W/S/Setas] Navegar | [Z/Enter/Espaço] Confirmar | [1-4] Atalhos');
           this.statusText.setColor('#555577');
         }
       });
     }
+  }
+
+  private _startTavernHub(): void {
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+      gameContainer.style.display = 'none';
+    }
+    const hub = new TavernHub();
+    hub.start(() => {
+      if (gameContainer) {
+        gameContainer.style.display = 'flex';
+      }
+      this.scene.restart();
+    });
+  }
+
+  private _startGsapBattle(): void {
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+      gameContainer.style.display = 'none';
+    }
+    const arena = new GsapBattleArena();
+    arena.start(() => {
+      if (gameContainer) {
+        gameContainer.style.display = 'flex';
+      }
+      this.scene.restart();
+    });
   }
 }

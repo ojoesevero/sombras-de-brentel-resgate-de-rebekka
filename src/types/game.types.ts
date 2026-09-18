@@ -125,6 +125,18 @@ export interface EnemyActionLog {
  */
 export interface SceneTransitionData {
   playerData?: CombatantState | null;
+  inventoryData?: SerializedInventory | null;
+  questsData?: QuestsDataMap | null;
+  spawnPoint?: { x: number; y: number };
+}
+
+/**
+ * Payload completo e serializável para persistência de progresso do jogo.
+ */
+export interface GameStatePayload {
+  playerData: CombatantState;
+  inventoryData: SerializedInventory;
+  questsData: QuestsDataMap;
   spawnPoint?: { x: number; y: number };
 }
 
@@ -164,6 +176,15 @@ export interface TestItemDefinition {
 }
 
 export type ItemsDataMap = Record<string, TestItemDefinition>;
+
+export interface InventoryItemRecord extends TestItemDefinition {
+  quantity: number;
+}
+
+export interface SerializedInventory {
+  gold: number;
+  items: InventoryItemRecord[];
+}
 
 export interface TrainingTargetDefinition {
   id: string;

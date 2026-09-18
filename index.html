@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Sombras de Brentel: Resgate de Rebekka</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       margin: 0;
@@ -20,7 +23,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: monospace;
+      font-family: 'Outfit', sans-serif;
     }
 
     #game-container {
@@ -43,6 +46,8 @@
 </head>
 <body>
   <div id="game-container"></div>
+  <div id="tavern-gsap-container"></div>
+  <div id="battle-gsap-container"></div>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

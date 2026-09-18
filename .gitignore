@@ -6,3 +6,5 @@ dist/
 .env.local
 savegame.dat
 coverage/
+__pycache__/
+*.pyc

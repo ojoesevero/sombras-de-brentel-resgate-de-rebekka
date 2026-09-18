@@ -15,8 +15,7 @@ A fundação adota uma arquitetura em 4 camadas desacopladas com contratos estri
 |                  CAMADA 1: CORE DOMAIN (Regras Puras)                   |
 |  - Combatant.ts (Combatente: HP, TestResource, mitigação, ataques)      |
 |  - TurnEngine.ts (FSM de turnos: fila, ações, alvos, vitória e derrota) |
-|  [Infraestrutura Experimental Desconectada]:                            |
-|  - InventoryModel.ts (Modelo de itens, estoque e ouro - desacoplado)    |
+|  - InventoryModel.ts (Modelo de itens, estoque, ouro e consumo)         |
 |  - QuestGraph.ts (Grafo de missões: locked/active/completed)            |
 |  * 100% isolada de Phaser/DOM - Testada via tsx + node:test             |
 +-------------------------------------------------------------------------+
@@ -25,8 +24,8 @@ A fundação adota uma arquitetura em 4 camadas desacopladas com contratos estri
 |                  CAMADA 2: APPLICATION & SERVICES                       |
 |  - InputService.ts (Mapeamento de teclado e ciclo de vida de listeners) |
 |  - EventBus.ts (Barramento desacoplado tipado com generics estritos)    |
-|  [Infraestrutura Experimental Desconectada]:                            |
 |  - SaveService.ts (Persistência multi-driver: LocalStorage + In-Memory) |
+|  - AudioService.ts (Síntese sonora procedural Web Audio)                |
 +-------------------------------------------------------------------------+
                                      |
 +-------------------------------------------------------------------------+
@@ -34,9 +33,9 @@ A fundação adota uma arquitetura em 4 camadas desacopladas com contratos estri
 |  - BaseScene.ts (Cena base abstrata configurando roundPixels na câmera) |
 |  - BootScene.ts (Inicialização de renderização e delegador de boot)     |
 |  - PreloadScene.ts (Carregamento de JSONs e geração de pixel art)       |
-|  - MainMenuScene.ts (Menu principal retro navegável 100% por teclado)   |
-|  - TechnicalSandboxScene.ts (Visão top-down, colisão, diálogo de teste) |
-|  - BattlePrototypeScene.ts (Arena de turnos, seleção de alvos e FSM)   |
+|  - MainMenuScene.ts (Menu principal retro com opção de Continuar Save)  |
+|  - TechnicalSandboxScene.ts (Top-down, colisão, HUD, Runa de Salvar)   |
+|  - BattlePrototypeScene.ts (Arena de turnos com consumo de inventário)  |
 +-------------------------------------------------------------------------+
                                      |
 +-------------------------------------------------------------------------+
@@ -71,29 +70,35 @@ Para assegurar fidelidade matemática aos clássicos em pixel art e eliminar dis
 
 ---
 
-## 3. Fluxo de Cenas e Desconexão de Sistemas Excedentes
+## 3. Fluxo de Cenas e Integração dos Sistemas
 
 ```mermaid
 graph TD
     Boot[1. BootScene] --> Preload[2. PreloadScene]
     Preload --> Menu[3. MainMenuScene]
     
-    Menu -->|Tecla 1 ou Confirmar| Sandbox[4. TechnicalSandboxScene (Top-Down Sandbox)]
-    Menu -->|Tecla 2 ou Confirmar| Battle[5. BattlePrototypeScene (Turn Arena)]
+    Menu -->|Continuar Save / Tecla 1| Sandbox[4. TechnicalSandboxScene (Top-Down Sandbox)]
+    Menu -->|Tecla 2| Battle[5. BattlePrototypeScene (Turn Arena)]
     
-    Sandbox -->|Portal de Combate| Battle
-    Battle -->|Vitória / Derrota / Fuga| Sandbox
+    Sandbox -->|Runa de Salvar| Save[SaveService (Persistência UTF-8/Base64)]
+    Sandbox -->|Falar com Instrutor| Quests[QuestGraph & Recompensa de Inventário]
+    Sandbox -->|Portal de Combate (Transfere Estado)| Battle
+    Battle -->|Consumir Item| Inv[InventoryModel (Débito de Poções)]
+    Battle -->|Vitória / Fuga (Recompensa Ouro)| Sandbox
     
     Sandbox -.->|Tecla ESC / Cancelar| Menu
     Battle -.->|Tecla ESC / Cancelar| Sandbox
 ```
 
 ### Status dos Módulos:
-1. **Fluxo Executável Ativo:** `BootScene`, `PreloadScene`, `MainMenuScene`, `TechnicalSandboxScene`, `BattlePrototypeScene`, `Combatant`, `TurnEngine`, `InputService`, `EventBus`, `pixelScale`.
-2. **Infraestrutura Experimental Desconectada:**
-   - `InventoryModel`: Não é instanciado pelas cenas ativas; permanece coberto por testes unitários.
-   - `QuestGraph`: Não é instanciado pelas cenas ativas; permanece coberto por testes unitários.
-   - `SaveService`: Não é instanciado pelas cenas ativas; permanece coberto por testes unitários.
+1. **Fluxo Executável Totalmente Integrado:**
+   - `Combatant`: HP, mitigação de dano, geração de recurso e habilidades.
+   - `TurnEngine`: FSM de turnos, fila de ações e condições de fim de combate.
+   - `InventoryModel`: Gerenciamento de ouro e itens, com consumo real na batalha e recompensas.
+   - `QuestGraph`: Progresso e conclusão de objetivos refletidos no HUD e nos diálogos.
+   - `SaveService`: Persistência multi-driver (LocalStorage e memória) via Runa de Salvamento e "Continuar" no Menu Principal.
+   - `InputService` & `EventBus`: Entrada desacoplada e barramento de eventos.
+   - `pixelScale`: Integer scaling pixel-perfect centralizado.
 
 ---
 
@@ -116,8 +121,8 @@ O mapeamento de controles é centralizado em `src/services/InputService.ts`:
 - **Verificação de Tipos:** `npm run typecheck` (`tsc --noEmit`) executado com `strict: true`, `noImplicitAny: true`, `moduleResolution: "bundler"`.
 
 ### Cobertura de Testes (25 testes / 5 suites):
-1. [`tests/Combatant.test.ts`](file:///c:/Users/jonat/OneDrive/Documentos/07_Projetos_Dev_Python/sombras-de-brentel-resgate-de-rebekka/tests/Combatant.test.ts): 7 testes validando atributos, mitigação de dano por defesa, ganho de recurso ao ser atingido e atacar, habilidade técnica e cura.
-2. [`tests/TurnEngine.test.ts`](file:///c:/Users/jonat/OneDrive/Documentos/07_Projetos_Dev_Python/sombras-de-brentel-resgate-de-rebekka/tests/TurnEngine.test.ts): 6 testes cobrindo FSM de turnos, ataque básico, turno de inimigos, vitória, derrota e fuga.
-3. [`tests/InventoryModel.test.ts`](file:///c:/Users/jonat/OneDrive/Documentos/07_Projetos_Dev_Python/sombras-de-brentel-resgate-de-rebekka/tests/InventoryModel.test.ts): 5 testes validando saldo inicial, adição, remoção, uso de item e serialização/desserialização.
-4. [`tests/QuestGraph.test.ts`](file:///c:/Users/jonat/OneDrive/Documentos/07_Projetos_Dev_Python/sombras-de-brentel-resgate-de-rebekka/tests/QuestGraph.test.ts): 4 testes cobrindo status inicial, avanço de missão, reset e serialização.
-5. [`tests/SaveService.test.ts`](file:///c:/Users/jonat/OneDrive/Documentos/07_Projetos_Dev_Python/sombras-de-brentel-resgate-de-rebekka/tests/SaveService.test.ts): 3 testes validando codificação Base64 com suporte a UTF-8/acentuação, persistência e limpeza.
+1. [`tests/Combatant.test.ts`](file:///c:/Users/SAAV054/Documents/Desenvolvimento/pessoal/sombras-de-brentel-resgate-de-rebekka/tests/Combatant.test.ts): 7 testes validando atributos, mitigação de dano por defesa, ganho de recurso ao ser atingido e atacar, habilidade técnica e cura.
+2. [`tests/TurnEngine.test.ts`](file:///c:/Users/SAAV054/Documents/Desenvolvimento/pessoal/sombras-de-brentel-resgate-de-rebekka/tests/TurnEngine.test.ts): 6 testes cobrindo FSM de turnos, ataque básico, turno de inimigos, vitória, derrota e fuga.
+3. [`tests/InventoryModel.test.ts`](file:///c:/Users/SAAV054/Documents/Desenvolvimento/pessoal/sombras-de-brentel-resgate-de-rebekka/tests/InventoryModel.test.ts): 5 testes validando saldo inicial, adição, remoção, uso de item e serialização/desserialização.
+4. [`tests/QuestGraph.test.ts`](file:///c:/Users/SAAV054/Documents/Desenvolvimento/pessoal/sombras-de-brentel-resgate-de-rebekka/tests/QuestGraph.test.ts): 4 testes cobrindo status inicial, avanço de missão, reset e serialização.
+5. [`tests/SaveService.test.ts`](file:///c:/Users/SAAV054/Documents/Desenvolvimento/pessoal/sombras-de-brentel-resgate-de-rebekka/tests/SaveService.test.ts): 3 testes validando codificação Base64 com suporte a UTF-8/acentuação, persistência e limpeza.
