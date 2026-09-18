@@ -1,0 +1,521 @@
+/* ==========================================================================
+   ESTILOS DO MUNDO DA FLORESTA CINZENTA (100% HTML5 & CSS3 PURO - SEM JPG/PNG)
+   Inspirado na estética luminosa e profunda de Sea of Stars & Chrono Trigger
+   ========================================================================== */
+
+#forest-world-container {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #05080c;
+  font-family: 'Outfit', sans-serif;
+  user-select: none;
+  z-index: 100;
+}
+
+#forest-world-container.active {
+  display: block;
+}
+
+/* Viewport Cinemático da Câmera 16:9 Centralizado */
+.forest-viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at 50% 30%, #0d2620 0%, #06110f 60%, #020507 100%);
+}
+
+/* Palco Expandido com Parallax (Largura maior que o viewport para câmera fluida) */
+.forest-stage {
+  position: absolute;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* --------------------------------------------------------------------------
+   CAMADAS DE PARALLAX E PROFUNDIDADE 2.5D
+   -------------------------------------------------------------------------- */
+
+/* 1. Céu e Neblina Distante */
+.layer-sky {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 480px;
+  background: linear-gradient(180deg, #050a12 0%, #09191d 45%, #102d28 85%, transparent 100%);
+  z-index: 1;
+}
+
+/* Silhuetas de Montanhas e Floresta Profunda */
+.layer-mountains {
+  position: absolute;
+  top: 180px;
+  left: 0;
+  width: 100%;
+  height: 300px;
+  background: 
+    radial-gradient(ellipse at 20% 100%, #081717 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 100%, #0c2020 0%, transparent 70%),
+    radial-gradient(ellipse at 80% 100%, #071515 0%, transparent 60%);
+  opacity: 0.85;
+  z-index: 2;
+}
+
+/* Feixes de Luz Volumétrica (God Rays) */
+.layer-god-rays {
+  position: absolute;
+  top: -50px;
+  left: 0;
+  width: 100%;
+  height: 700px;
+  background: repeating-linear-gradient(
+    -35deg,
+    rgba(255, 250, 210, 0.04) 0px,
+    rgba(255, 250, 210, 0.04) 40px,
+    transparent 40px,
+    transparent 160px
+  );
+  pointer-events: none;
+  animation: rayShimmer 8s ease-in-out infinite alternate;
+  z-index: 3;
+}
+
+@keyframes rayShimmer {
+  0% { opacity: 0.5; transform: skewX(-2deg); }
+  100% { opacity: 0.9; transform: skewX(2deg); }
+}
+
+/* Neblina Volumétrica Rasteira */
+.layer-mist {
+  position: absolute;
+  top: 400px;
+  left: -200px;
+  width: 2400px;
+  height: 250px;
+  background: radial-gradient(ellipse at 50% 50%, rgba(180, 220, 210, 0.12) 0%, transparent 70%);
+  filter: blur(25px);
+  pointer-events: none;
+  animation: mistFloat 18s linear infinite alternate;
+  z-index: 4;
+}
+
+@keyframes mistFloat {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(160px); }
+}
+
+/* 2. Árvores de Fundo (Midground) */
+.layer-midground-trees {
+  position: absolute;
+  top: 240px;
+  left: 0;
+  width: 100%;
+  height: 500px;
+  display: flex;
+  justify-content: space-around;
+  pointer-events: none;
+  filter: brightness(0.7) contrast(1.1);
+  z-index: 5;
+}
+
+/* 3. Chão da Trilha (Playfield Principal de Exploração) */
+.layer-playfield {
+  position: absolute;
+  top: 480px;
+  left: 0;
+  width: 100%;
+  height: 600px;
+  background: linear-gradient(180deg, #101c18 0%, #0d1714 30%, #080f0d 100%);
+  box-shadow: inset 0 20px 40px rgba(0, 0, 0, 0.7);
+  z-index: 10;
+}
+
+/* Trilha Sinuosa de Pedras e Terra Iluminada */
+.forest-path {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 100%;
+  height: 280px;
+  background: 
+    radial-gradient(ellipse at 30% 50%, #2a332a 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 50%, #263127 0%, transparent 65%),
+    linear-gradient(180deg, rgba(22, 36, 28, 0.9) 0%, rgba(35, 46, 36, 0.95) 50%, rgba(16, 26, 20, 0.9) 100%);
+  border-top: 2px dashed rgba(60, 90, 70, 0.4);
+  border-bottom: 2px dashed rgba(60, 90, 70, 0.4);
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.6);
+}
+
+/* Detalhes de Pedras na Trilha */
+.path-stones {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 15% 30%, #465349 0, #222c24 6px, transparent 7px),
+    radial-gradient(circle at 35% 70%, #4a564c 0, #252e27 8px, transparent 9px),
+    radial-gradient(circle at 55% 40%, #3e4c41 0, #1f2821 7px, transparent 8px),
+    radial-gradient(circle at 75% 65%, #465349 0, #222c24 9px, transparent 10px),
+    radial-gradient(circle at 88% 25%, #3d4a40 0, #1f2922 6px, transparent 7px);
+  opacity: 0.65;
+}
+
+/* Tochas com Iluminação Radial Dinâmica */
+.torch-station {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 15;
+}
+
+.torch-light-aura {
+  position: absolute;
+  top: -30px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 140, 0, 0.35) 0%, rgba(255, 90, 0, 0.12) 45%, transparent 70%);
+  pointer-events: none;
+  animation: auraFlicker 3s infinite alternate ease-in-out;
+}
+
+@keyframes auraFlicker {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 0.95; }
+  100% { transform: scale(0.98); opacity: 0.8; }
+}
+
+.torch-flame {
+  animation: flameBounce 0.4s infinite alternate ease-in-out;
+  transform-origin: 12px 16px;
+}
+
+@keyframes flameBounce {
+  0% { transform: scale(0.95) rotate(-3deg); }
+  100% { transform: scale(1.08) rotate(3deg); }
+}
+
+/* 4. Entidades: Heróis e Criaturas */
+.entity-container {
+  position: absolute;
+  width: 54px;
+  height: 64px;
+  transform-origin: bottom center;
+  transition: filter 0.2s ease;
+  z-index: 20;
+}
+
+.entity-container.player-rhogar {
+  z-index: 25;
+}
+
+.entity-container.ally-joseph {
+  z-index: 24;
+}
+
+.entity-container.is-moving .leg-left {
+  animation: legWalk 0.3s infinite alternate ease-in-out;
+}
+
+.entity-container.is-moving .leg-right {
+  animation: legWalk 0.3s infinite alternate-reverse ease-in-out;
+}
+
+.entity-container.is-moving .char-cape {
+  animation: capeFlutter 0.4s infinite alternate ease-in-out;
+}
+
+@keyframes legWalk {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+@keyframes capeFlutter {
+  0% { transform: skewX(-2deg); }
+  100% { transform: skewX(4deg); }
+}
+
+/* Alerta de Batalha '!' sobre os monstros */
+.battle-alert-bubble {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #ff1744;
+  color: #ffffff;
+  font-family: 'Cinzel', serif;
+  font-weight: 800;
+  font-size: 14px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 10px #ff1744;
+  animation: alertPulse 0.4s infinite alternate ease-in-out;
+  z-index: 35;
+}
+
+@keyframes alertPulse {
+  0% { transform: translateX(-50%) scale(0.9); }
+  100% { transform: translateX(-50%) scale(1.2); }
+}
+
+/* 5. Primeiro Plano (Canopy e Folhagens de Borda com Desfoque 2.5D) */
+.layer-foreground-canopy {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.canopy-branch-left {
+  position: absolute;
+  top: -30px;
+  left: -50px;
+  width: 320px;
+  height: 220px;
+  background: radial-gradient(ellipse at top left, #0e1b14 0%, #050a08 75%, transparent 100%);
+  border-radius: 0 0 180px 0;
+  filter: blur(2px);
+}
+
+.canopy-branch-right {
+  position: absolute;
+  top: -30px;
+  right: -50px;
+  width: 340px;
+  height: 240px;
+  background: radial-gradient(ellipse at top right, #0e1b14 0%, #050a08 75%, transparent 100%);
+  border-radius: 0 0 0 200px;
+  filter: blur(2.5px);
+}
+
+/* Partículas Flutuantes: Vaga-lumes */
+.firefly-particle {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #adff2f;
+  box-shadow: 0 0 10px #adff2f, 0 0 20px #76ff03;
+  pointer-events: none;
+  animation: fireflyGlow 2.5s infinite ease-in-out;
+  z-index: 45;
+}
+
+@keyframes fireflyGlow {
+  0%, 100% { opacity: 0.2; transform: translateY(0) scale(0.8); }
+  50% { opacity: 1; transform: translateY(-20px) scale(1.3); }
+}
+
+/* --------------------------------------------------------------------------
+   INTERFACE DE COMBATE CONTÍNUO (SEAMLESS FIELD BATTLE HUD)
+   -------------------------------------------------------------------------- */
+
+.field-battle-hud {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  width: 780px;
+  max-width: 90vw;
+  background: rgba(8, 12, 18, 0.94);
+  border: 2px solid #ffd54f;
+  border-radius: 12px;
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.9), 0 0 20px rgba(255, 213, 79, 0.25);
+  padding: 16px 24px;
+  backdrop-filter: blur(8px);
+  transition: transform 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 1000;
+}
+
+.field-battle-hud.active {
+  transform: translateX(-50%) translateY(0);
+}
+
+.battle-hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 213, 79, 0.3);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.active-hero-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.active-hero-name {
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffd54f;
+}
+
+.synergy-bar-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.synergy-bar-track {
+  width: 140px;
+  height: 8px;
+  background: #1a232b;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid #455a64;
+}
+
+.synergy-bar-fill {
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, #00e5ff, #76ff03);
+  box-shadow: 0 0 8px #00e5ff;
+  transition: width 0.3s ease;
+}
+
+.battle-commands-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.command-card {
+  background: rgba(22, 32, 44, 0.85);
+  border: 1px solid #37474f;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #cfd8dc;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.18s ease;
+}
+
+.command-card.selected {
+  background: rgba(255, 213, 79, 0.2);
+  border-color: #ffd54f;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(255, 213, 79, 0.35);
+}
+
+.command-card .hotkey {
+  font-size: 10px;
+  background: #263238;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: #ffd54f;
+}
+
+.command-help-text {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #90a4ae;
+  text-align: center;
+  min-height: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   ANEL DE AÇÃO SINCRONIZADA (TIMED HIT RING - SEA OF STARS STYLE)
+   -------------------------------------------------------------------------- */
+
+.timed-action-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 900;
+}
+
+.timed-hit-ring {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  border: 3px solid #00e5ff;
+  border-radius: 50%;
+  box-shadow: 0 0 20px #00e5ff, inset 0 0 10px #00e5ff;
+  transform: translate(-50%, -50%) scale(1.8);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.timed-hit-target-point {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border: 2px dashed #ffd54f;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+/* Dano Flutuante */
+.floating-damage {
+  position: absolute;
+  font-family: 'Cinzel', serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: #ffea00;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9), 0 0 12px #ff8800;
+  pointer-events: none;
+  z-index: 950;
+  transform: translate(-50%, 0);
+}
+
+/* HUD Superior de Exploração */
+.forest-exploration-hud {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(6, 10, 15, 0.88);
+  border: 1px solid #455a64;
+  border-radius: 30px;
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  color: #eceff1;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  z-index: 1000;
+}
+
+.hud-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hud-stat-icon {
+  color: #ffd54f;
+  font-weight: bold;
+}

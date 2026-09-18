@@ -3,6 +3,7 @@ import { InputService, GameAction } from '../services/InputService';
 import { globalSaveService } from '../services/SaveService';
 import { GsapBattleArena } from '../combat-gsap/GsapBattleArena';
 import { TavernHub } from '../tavern-gsap/TavernHub';
+import { ForestWorldEngine } from '../rendering/ForestWorldEngine';
 
 interface MenuOption {
   text: string;
@@ -26,14 +27,12 @@ export class MainMenuScene extends BaseScene {
   }
 
   public create(): void {
-    this.initBaseCamera();
-    this.cameras.main.setBackgroundColor(0x0a0a14);
+    const { width, height } = this.scale;
 
-    // Fundo Cenográfico Real (Cidade de Rastphen) com Overlay Atmosférico
-    if (this.textures.exists('bg_cidade_rastphen')) {
-      this.add.image(240, 135, 'bg_cidade_rastphen').setDisplaySize(480, 270).setDepth(-10);
-      this.add.rectangle(240, 135, 480, 270, 0x050814, 0.72).setDepth(-9);
-    }
+    // Fundo Gradiente Escuro Retro com Grid Sutil
+    const bg = this.add.graphics();
+    bg.fillGradientStyle(0x050811, 0x050811, 0x111628, 0x111628, 1);
+    bg.fillRect(0, 0, width, height);
 
     // Título Principal com Fonte Cinzel Épica
     this.add.text(240, 36, 'SOMBRAS DE BRENTEL', {
@@ -67,7 +66,7 @@ export class MainMenuScene extends BaseScene {
     }
 
     this.options.push(
-      { text: '★ Estrada da Floresta (Chrono Trigger & Sea of Stars)', scene: 'ForestRouteScene' },
+      { text: '★ Estrada da Floresta [100% HTML/CSS/SVG Procedural]', action: () => this._startForestWorld() },
       { text: hasSave ? '1. Retornar à Taverna [GSAP]' : '1. Nova Aventura: Taverna Cauda do Dragão [GSAP]', action: () => this._startTavernHub() },
       { text: '2. Arena de Combate por Turnos (Phaser)', scene: 'BattlePrototypeScene' },
       { text: '3. Arena Estilizada GSAP + CSS3 [PROTÓTIPO]', action: () => this._startGsapBattle() },
@@ -150,11 +149,11 @@ export class MainMenuScene extends BaseScene {
       });
       const keyFive = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FIVE);
       keyFive.on('down', () => {
-        this.scene.start('ForestRouteScene');
+        this._startForestWorld();
       });
       const keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
       keyF.on('down', () => {
-        this.scene.start('ForestRouteScene');
+        this._startForestWorld();
       });
       const keyG = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
       keyG.on('down', () => {
@@ -222,6 +221,20 @@ export class MainMenuScene extends BaseScene {
     }
     const arena = new GsapBattleArena();
     arena.start(() => {
+      if (gameContainer) {
+        gameContainer.style.display = 'flex';
+      }
+      this.scene.restart();
+    });
+  }
+
+  private _startForestWorld(): void {
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+      gameContainer.style.display = 'none';
+    }
+    const forest = new ForestWorldEngine();
+    forest.start(() => {
       if (gameContainer) {
         gameContainer.style.display = 'flex';
       }

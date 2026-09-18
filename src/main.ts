@@ -3,6 +3,7 @@ import { gameConfig } from './config/gameConfig';
 import { applyIntegerScaleToGame } from './config/pixelScale';
 import { GsapBattleArena } from './combat-gsap/GsapBattleArena';
 import { TavernHub } from './tavern-gsap/TavernHub';
+import { ForestWorldEngine } from './rendering/ForestWorldEngine';
 
 // Inicializa a instância principal do jogo Phaser
 const game = new Phaser.Game(gameConfig);
@@ -14,7 +15,14 @@ window.addEventListener('load', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const mode = urlParams.get('mode');
 
-  if (mode === 'tavern') {
+  if (mode === 'forest') {
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) gameContainer.style.display = 'none';
+    const forest = new ForestWorldEngine();
+    forest.start(() => {
+      if (gameContainer) gameContainer.style.display = 'flex';
+    });
+  } else if (mode === 'tavern') {
     const gameContainer = document.getElementById('game-container');
     if (gameContainer) gameContainer.style.display = 'none';
     const hub = new TavernHub();
