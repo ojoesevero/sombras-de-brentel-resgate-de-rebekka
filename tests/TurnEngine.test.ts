@@ -85,4 +85,67 @@ describe('TurnEngine Unit Tests (TypeScript)', () => {
     assert.equal(player.isAlive(), false);
     assert.equal(engine.state, BattleState.DEFEAT);
   });
+
+  it('deve alternar turnos entre múltiplos heróis da party antes do turno dos inimigos', () => {
+    const joseph = new Combatant({
+      id: 'joseph',
+      name: 'Joseph Sylven',
+      maxHp: 110,
+      hp: 110,
+      attack: 18,
+      defense: 10,
+      isPlayer: true
+    });
+
+    const partyEngine = new TurnEngine({
+      party: [player, joseph],
+      enemies: [targetA, targetB]
+    });
+
+    partyEngine.start();
+    assert.equal(partyEngine.activeHeroIndex, 0); // Rhogar
+    assert.equal(partyEngine.getActiveHero().name, 'Rhogar (Player)');
+
+    // Rhogar ataca
+    const res1 = partyEngine.executePlayerAction('attack', { targetIndex: 0 });
+    assert.equal(res1.success, true);
+    assert.equal(partyEngine.state, BattleState.PLAYER_TURN);
+    assert.equal(partyEngine.activeHeroIndex, 1); // Agora é o Joseph!
+    assert.equal(partyEngine.getActiveHero().name, 'Joseph Sylven');
+
+    // Joseph ataca -> Agora sim todos agiram e vai para ENEMY_TURN
+    const res2 = partyEngine.executePlayerAction('attack', { targetIndex: 0 });
+    assert.equal(res2.success, true);
+    assert.equal(partyEngine.state, BattleState.ENEMY_TURN);
+  });
+
+  it('deve executar combo com sucesso consumindo sinergia e aplicando dano elevado', () => {
+    const joseph = new Combatant({
+      id: 'joseph',
+      name: 'Joseph Sylven',
+      maxHp: 110,
+      hp: 110,
+      attack: 18,
+      defense: 10,
+      isPlayer: true
+    });
+
+    const partyEngine = new TurnEngine({
+      party: [player, joseph],
+      enemies: [targetA]
+    });
+
+    partyEngine.start();
+    partyEngine.comboEngine.addSynergy(50); // Garante sinergia
+
+    const initialEnemyHp = targetA.hp;
+    const result = partyEngine.executePlayerAction('combo', {
+      comboId: 'combo_rhogar_joseph',
+      targetIndex: 0
+    });
+
+    assert.equal(result.success, true);
+    assert.ok((result.damage || 0) > 40);
+    assert.ok(targetA.hp < initialEnemyHp);
+  });
 });

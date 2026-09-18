@@ -67,6 +67,7 @@ export class MainMenuScene extends BaseScene {
     }
 
     this.options.push(
+      { text: '★ Estrada da Floresta (Chrono Trigger & Sea of Stars)', scene: 'ForestRouteScene' },
       { text: hasSave ? '1. Retornar à Taverna [GSAP]' : '1. Nova Aventura: Taverna Cauda do Dragão [GSAP]', action: () => this._startTavernHub() },
       { text: '2. Arena de Combate por Turnos (Phaser)', scene: 'BattlePrototypeScene' },
       { text: '3. Arena Estilizada GSAP + CSS3 [PROTÓTIPO]', action: () => this._startGsapBattle() },
@@ -77,8 +78,8 @@ export class MainMenuScene extends BaseScene {
     this.selectedIndex = 0;
     this.optionTexts = [];
 
-    const startY = 88;
-    const spacingY = 22;
+    const startY = 82;
+    const spacingY = 20;
 
     this.options.forEach((opt, idx) => {
       const t = this.add.text(240, startY + idx * spacingY, opt.text, {
@@ -146,6 +147,14 @@ export class MainMenuScene extends BaseScene {
       const keyFour = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR);
       keyFour.on('down', () => {
         this.scene.start('AssetGalleryScene');
+      });
+      const keyFive = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FIVE);
+      keyFive.on('down', () => {
+        this.scene.start('ForestRouteScene');
+      });
+      const keyF = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.F);
+      keyF.on('down', () => {
+        this.scene.start('ForestRouteScene');
       });
       const keyG = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.G);
       keyG.on('down', () => {

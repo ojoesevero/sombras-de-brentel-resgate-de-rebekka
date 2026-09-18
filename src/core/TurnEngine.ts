@@ -1,50 +1,84 @@
 import { Combatant } from './Combatant';
+import { ComboSkillEngine } from './ComboSkillEngine';
 import {
   BattleState,
   BattleStateType,
   TurnAction,
   TurnActionPayload,
   TurnActionResult,
-  EnemyActionLog
+  EnemyActionLog,
+  HeroId
 } from '../types/game.types';
 
 export interface TurnEngineOptions {
-  player: Combatant;
+  player?: Combatant;
+  party?: Combatant[];
   enemies: Combatant[];
+  comboEngine?: ComboSkillEngine;
 }
 
 /**
+ * [CHRONO TRIGGER & SEA OF STARS ENHANCED]
  * Motor de Combate por Turnos Desacoplado em TypeScript.
- * Controla os turnos do jogador e dos alvos de treinamento sem acoplamento à UI.
+ * Suporta party dinâmica de 1 a 6 heróis, combos duplos/triplos e ações sincronizadas.
  */
 export class TurnEngine {
-  public readonly player: Combatant;
+  public readonly party: Combatant[];
   public readonly enemies: Combatant[];
+  public readonly comboEngine: ComboSkillEngine;
   public state: BattleStateType;
   public turnCount: number;
+  public activeHeroIndex: number;
   public readonly log: string[];
 
-  constructor({ player, enemies = [] }: TurnEngineOptions) {
-    this.player = player;
+  constructor({ player, party, enemies = [], comboEngine }: TurnEngineOptions) {
+    if (party && party.length > 0) {
+      this.party = party;
+    } else if (player) {
+      this.party = [player];
+    } else {
+      throw new Error('TurnEngine requer ao menos um Combatant (player ou party).');
+    }
+
     this.enemies = enemies;
+    this.comboEngine = comboEngine || new ComboSkillEngine();
     this.state = BattleState.NOT_STARTED;
     this.turnCount = 0;
+    this.activeHeroIndex = 0;
     this.log = [];
   }
 
-  public start(): BattleStateType {
-    this.state = BattleState.PLAYER_TURN;
-    this.turnCount = 1;
-    this._log('Combate de teste iniciado. Turno do Jogador.');
-    return this.state;
+  /**
+   * Retrocompatibilidade com testes e código legado que acessam `engine.player`.
+   */
+  public get player(): Combatant {
+    return this.party[0];
+  }
+
+  public getActiveHero(): Combatant {
+    const aliveParty = this.getAliveParty();
+    if (aliveParty.length === 0) return this.party[0];
+    return this.party[this.activeHeroIndex] || aliveParty[0];
+  }
+
+  public getAliveParty(): Combatant[] {
+    return this.party.filter(h => h.isAlive());
   }
 
   public getAliveEnemies(): Combatant[] {
     return this.enemies.filter(e => e.isAlive());
   }
 
+  public start(): BattleStateType {
+    this.state = BattleState.PLAYER_TURN;
+    this.turnCount = 1;
+    this.activeHeroIndex = 0;
+    this._log('Combate em campo iniciado. Formação de batalha pronta.');
+    return this.state;
+  }
+
   public isBattleOver(): boolean {
-    if (!this.player.isAlive()) {
+    if (this.getAliveParty().length === 0) {
       this.state = BattleState.DEFEAT;
       return true;
     }
@@ -55,7 +89,10 @@ export class TurnEngine {
     return false;
   }
 
-  public executePlayerAction(action: TurnAction, payload: TurnActionPayload = {}): TurnActionResult {
+  public executePlayerAction(
+    action: TurnAction | 'combo',
+    payload: TurnActionPayload & { comboId?: string; timedMultiplier?: number } = {}
+  ): TurnActionResult {
     if (this.state !== BattleState.PLAYER_TURN) {
       return { success: false, reason: 'Não é o turno do jogador.' };
     }
@@ -66,72 +103,141 @@ export class TurnEngine {
       return { success: true, battleState: this.state };
     }
 
+    const aliveParty = this.getAliveParty();
+    if (aliveParty.length === 0) {
+      this.state = BattleState.DEFEAT;
+      return { success: false, battleState: this.state, reason: 'Todos os heróis caíram.' };
+    }
+
+    const currentHero = this.getActiveHero();
     const targetIndex = payload.targetIndex !== undefined ? payload.targetIndex : 0;
     const target = aliveEnemies[targetIndex] || aliveEnemies[0];
+    const timedMultiplier = payload.timedMultiplier || 1.0;
 
-    let result: TurnActionResult = { success: false, action, target: target.name };
+    let result: TurnActionResult = { success: false, action: action as TurnAction, target: target.name };
 
     switch (action) {
       case 'attack': {
-        const attackRes = this.player.basicAttack(target);
-        this._log(`${this.player.name} atacou ${target.name} causando ${attackRes.damage} de dano.`);
+        const baseAttack = currentHero.basicAttack(target);
+        const finalDamage = Math.max(1, Math.round(baseAttack.damage * timedMultiplier));
+        if (timedMultiplier > 1.0) {
+          const extraDamage = finalDamage - baseAttack.damage;
+          target.takeDamage(extraDamage);
+        }
+        this.comboEngine.addSynergy(timedMultiplier > 1.2 ? 20 : 10);
+        this._log(`${currentHero.name} atacou ${target.name} causando ${finalDamage} de dano.`);
         result = {
           success: true,
           action: 'attack',
-          damage: attackRes.damage,
-          targetDied: attackRes.targetDied
+          damage: finalDamage,
+          targetDied: !target.isAlive()
         };
         break;
       }
 
       case 'skill': {
-        const skillRes = this.player.technicalSkill(target);
+        const skillRes = currentHero.technicalSkill(target);
         if (!skillRes.success) {
           return {
             success: false,
-            reason: skillRes.reason || 'Recurso insuficiente para TechnicalSkill.'
+            reason: skillRes.reason || 'Recurso insuficiente para a habilidade.'
           };
         }
-        this._log(`${this.player.name} executou TechnicalSkill em ${target.name} causando ${skillRes.damage} de dano.`);
+        const finalDamage = Math.max(1, Math.round(skillRes.damage * timedMultiplier));
+        this.comboEngine.addSynergy(15);
+        this._log(`${currentHero.name} usou habilidade em ${target.name} causando ${finalDamage} de dano.`);
         result = {
           success: true,
           action: 'skill',
-          damage: skillRes.damage,
-          targetDied: skillRes.targetDied
+          damage: finalDamage,
+          targetDied: !target.isAlive()
+        };
+        break;
+      }
+
+      case 'combo': {
+        if (!payload.comboId) {
+          return { success: false, reason: 'Combo não especificado.' };
+        }
+        const partyIds = this.party.map(h => (h.id === 'player' ? 'rhogar' : h.id) as HeroId);
+        const executedCombo = this.comboEngine.consumeSynergyForCombo(payload.comboId, partyIds);
+        if (!executedCombo) {
+          return { success: false, reason: 'Sinergia insuficiente para o Combo.' };
+        }
+
+        const comboBaseDamage = Math.round(
+          (currentHero.attack + (this.party[1]?.attack || currentHero.attack * 0.8)) *
+          executedCombo.damageMultiplier
+        );
+        const comboFinalDamage = Math.max(1, Math.round(comboBaseDamage * timedMultiplier));
+        target.takeDamage(comboFinalDamage);
+
+        this._log(`COMBO: ${executedCombo.name} causou ${comboFinalDamage} de dano em ${target.name}!`);
+        result = {
+          success: true,
+          action: 'skill',
+          damage: comboFinalDamage,
+          targetDied: !target.isAlive()
         };
         break;
       }
 
       case 'defend': {
-        this.player.gainResource(15);
-        this._log(`${this.player.name} assumiu postura defensiva (+15 TestResource).`);
+        currentHero.gainResource(15);
+        this._log(`${currentHero.name} assumiu postura defensiva (+15 Recurso).`);
         result = { success: true, action: 'defend', resourceGained: 15 };
         break;
       }
 
-      case 'flee': {
-        this.state = BattleState.FLED;
-        this._log(`${this.player.name} recuou do combate de teste.`);
-        return { success: true, action: 'flee', battleState: this.state };
+      case 'item': {
+        currentHero.heal(40);
+        this._log(`${currentHero.name} usou Poção de Cura (+40 HP).`);
+        result = { success: true, action: 'item', itemId: payload.itemId || 'test_item_heal' };
+        break;
       }
 
-      case 'item': {
-        const healed = this.player.heal(40);
-        this._log(`${this.player.name} utilizou TestItem (+${healed} HP).`);
-        result = { success: true, action: 'item', itemId: 'test_item_heal' };
+      case 'flee': {
+        const canFlee = Math.random() > 0.3;
+        if (canFlee) {
+          this.state = BattleState.FLED;
+          this._log('O grupo recuou taticamente da batalha.');
+          return { success: true, action: 'flee', battleState: this.state };
+        }
+        this._log('Tentativa de recuo falhou!');
+        result = { success: false, action: 'flee_failed', reason: 'Fuga bloqueada pelos inimigos!' };
         break;
       }
 
       default:
-        return { success: false, reason: `Ação inválida.` };
+        return { success: false, reason: `Ação desconhecida: ${action}` };
     }
 
+    // Verifica vitória imediata
     if (this.isBattleOver()) {
-      return { ...result, battleState: this.state };
+      result.battleState = this.state;
+      return result;
     }
 
+    // Avança para o próximo herói da party ou conclui a rodada de heróis
+    this._advancePartyTurn();
+    result.battleState = this.state;
+    return result;
+  }
+
+  private _advancePartyTurn(): void {
+    let nextIndex = this.activeHeroIndex + 1;
+
+    while (nextIndex < this.party.length) {
+      if (this.party[nextIndex].isAlive()) {
+        this.activeHeroIndex = nextIndex;
+        return;
+      }
+      nextIndex++;
+    }
+
+    // Todos os heróis vivos agiram na rodada -> Turno dos Inimigos
+    this.activeHeroIndex = 0;
     this.state = BattleState.ENEMY_TURN;
-    return { ...result, battleState: this.state };
   }
 
   public processEnemyTurn(): EnemyActionLog[] {
@@ -139,32 +245,47 @@ export class TurnEngine {
       return [];
     }
 
-    const enemyActions: EnemyActionLog[] = [];
+    const aliveParty = this.getAliveParty();
     const aliveEnemies = this.getAliveEnemies();
+    const logs: EnemyActionLog[] = [];
 
-    for (const enemy of aliveEnemies) {
-      if (!this.player.isAlive()) break;
-
-      const damage = this.player.takeDamage(enemy.attack, 0);
-      this._log(`${enemy.name} atacou ${this.player.name} causando ${damage} de dano.`);
-
-      enemyActions.push({
-        enemyName: enemy.name,
-        damage,
-        playerHpRemaining: this.player.hp
-      });
+    if (aliveParty.length === 0) {
+      this.state = BattleState.DEFEAT;
+      return logs;
     }
+
+    aliveEnemies.forEach(enemy => {
+      if (!enemy.isAlive()) return;
+      const targets = this.getAliveParty();
+      if (targets.length === 0) return;
+
+      // Inimigo escolhe um alvo da party
+      const target = targets[Math.floor(Math.random() * targets.length)];
+      const attackRes = enemy.basicAttack(target);
+
+      logs.push({
+        enemyName: enemy.name,
+        targetHeroName: target.name,
+        damage: attackRes.damage,
+        playerHpRemaining: target.hp
+      });
+
+      this._log(`${enemy.name} atacou ${target.name} causando ${attackRes.damage} de dano.`);
+    });
 
     if (this.isBattleOver()) {
-      return enemyActions;
+      return logs;
     }
 
-    this.turnCount++;
+    // Retorna para o turno dos heróis
     this.state = BattleState.PLAYER_TURN;
-    return enemyActions;
+    this.activeHeroIndex = 0;
+    this.turnCount++;
+    this._log(`--- Rodada ${this.turnCount} ---`);
+    return logs;
   }
 
-  private _log(message: string): void {
-    this.log.push(`[T${this.turnCount}] ${message}`);
+  private _log(msg: string): void {
+    this.log.push(msg);
   }
 }

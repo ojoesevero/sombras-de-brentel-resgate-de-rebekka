@@ -408,9 +408,9 @@ export class TechnicalSandboxScene extends BaseScene {
       playerData: this.playerData.getState(),
       inventoryData: this.inventory.serialize(),
       questsData: this.questGraph.serialize(),
-      spawnPoint: { x: 240, y: 235 }
+      spawnPoint: { x: 80, y: 160 }
     };
-    this.scene.start('BattlePrototypeScene', transitionPayload);
+    this.scene.start('ForestRouteScene', transitionPayload);
   }
 
   private _updateHudVisuals(): void {
@@ -572,7 +572,7 @@ export class TechnicalSandboxScene extends BaseScene {
       this.promptText.setVisible(true);
     } else if (this.isNearDoor && !this.isInteracting) {
       this.promptText.setPosition(240, 235);
-      this.promptText.setText('[Z] Sair para a Arena');
+      this.promptText.setText('[Z] Sair para a Estrada da Floresta');
       this.promptText.setVisible(true);
     } else {
       this.promptText.setVisible(false);

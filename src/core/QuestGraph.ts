@@ -34,6 +34,10 @@ export class QuestGraph {
     return this.getStatus(questId) === 'active';
   }
 
+  public getActiveQuests(): QuestNode[] {
+    return Object.values(this.quests).filter(q => q.status === 'active');
+  }
+
   public setStatus(questId: string, status: QuestStatusType): boolean {
     if (!this.quests[questId]) {
       this.quests[questId] = {

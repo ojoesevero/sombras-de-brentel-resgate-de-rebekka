@@ -118,6 +118,55 @@ export interface EnemyActionLog {
   enemyName: string;
   damage: number;
   playerHpRemaining: number;
+  targetHeroName?: string;
+  isBlocked?: boolean;
+}
+
+/**
+ * Definição dos Heróis da Party (Os Seis de Brentel)
+ */
+export type HeroId = 'rhogar' | 'joseph' | 'alicia' | 'traudon' | 'veronica' | 'john';
+
+export interface HeroProfile {
+  id: HeroId;
+  name: string;
+  role: string;
+  portraitKey: string;
+  spriteKey: string;
+  accentColor: string;
+  baseStats: {
+    maxHp: number;
+    attack: number;
+    defense: number;
+    maxResource: number;
+    resourceName: string; // Ex: 'Fúria', 'Mana', 'Vigor', 'Inspiração'
+  };
+}
+
+/**
+ * Definição de Técnicas Combinadas (Chrono Trigger Style)
+ */
+export interface ComboTechDefinition {
+  id: string;
+  name: string;
+  description: string;
+  requiredHeroIds: HeroId[];
+  synergyCost: number; // Custo de Pontos de Sinergia (Combo Gauge)
+  damageMultiplier: number;
+  element: 'slash' | 'holy' | 'fire' | 'pierce' | 'dark' | 'support';
+  animationKey: string;
+}
+
+/**
+ * Resultado de Ação Sincronizada (Sea of Stars Style)
+ */
+export type TimedResultRating = 'PERFECT' | 'GOOD' | 'MISS';
+
+export interface TimedActionResult {
+  rating: TimedResultRating;
+  multiplier: number; // 1.35 para PERFECT, 1.15 para GOOD, 1.0 para MISS
+  damageBonus: number;
+  bonusSynergy: number;
 }
 
 /**

@@ -5,6 +5,7 @@ import { MainMenuScene } from '../scenes/MainMenuScene';
 import { TechnicalSandboxScene } from '../scenes/TechnicalSandboxScene';
 import { BattlePrototypeScene } from '../scenes/BattlePrototypeScene';
 import { AssetGalleryScene } from '../scenes/AssetGalleryScene';
+import { ForestRouteScene } from '../scenes/ForestRouteScene';
 import { LOGICAL_WIDTH, LOGICAL_HEIGHT } from './pixelScale';
 
 /**
@@ -37,6 +38,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     MainMenuScene,
     TechnicalSandboxScene,
     BattlePrototypeScene,
-    AssetGalleryScene
+    AssetGalleryScene,
+    ForestRouteScene
   ]
 };
