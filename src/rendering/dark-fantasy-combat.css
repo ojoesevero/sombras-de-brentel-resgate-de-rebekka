@@ -1,0 +1,441 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=EB+Garamond:wght@400;600&display=swap');
+
+/* ==========================================================================
+   DARK FANTASY COMBAT SYSTEM
+   ========================================================================== */
+
+#dark-fantasy-container {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000;
+  overflow: hidden;
+  font-family: 'EB Garamond', serif;
+  user-select: none;
+  z-index: 200;
+}
+
+#dark-fantasy-container.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Viewport 16:9 Estilo Dark Fantasy */
+.df-viewport {
+  position: relative;
+  width: 1024px;
+  height: 576px;
+  max-width: 100vw;
+  max-height: 100vh;
+  aspect-ratio: 16 / 9;
+  background: #050505;
+  overflow: hidden;
+  box-shadow: 0 0 80px rgba(0, 0, 0, 1), 0 0 20px rgba(139, 0, 0, 0.2);
+  border: 2px solid #2a2a2a;
+}
+
+.df-arena-stage {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url('/assets/scenarios/bg_dark_fantasy_forest.jpg') center/cover no-repeat;
+  image-rendering: pixelated;
+  overflow: hidden;
+  filter: contrast(1.1) brightness(0.8) sepia(0.2) hue-rotate(-10deg);
+}
+
+.df-ground-plateau {
+  position: absolute;
+  top: 210px;
+  left: 120px;
+  width: 864px;
+  height: 320px;
+  background: transparent;
+  z-index: 10;
+}
+
+/* BARRA SUPERIOR */
+.df-top-action-bar {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 820px;
+  height: 44px;
+  background: linear-gradient(to bottom, rgba(20, 15, 15, 0.95), rgba(10, 5, 5, 0.95));
+  border: 2px solid #3d2a2a;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  z-index: 500;
+}
+
+.df-action-name {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #c9b39a;
+  letter-spacing: 1px;
+}
+
+.df-action-effect-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.df-effect-label {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7a615a;
+  letter-spacing: 2px;
+}
+
+.df-effect-icon-box {
+  width: 28px;
+  height: 28px;
+  background: #1a1111;
+  border: 1.5px solid #4a2a2a;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 15px;
+  color: #c44;
+  box-shadow: 0 0 8px rgba(150, 0, 0, 0.3);
+}
+
+/* MENU CONTEXTUAL FLUTUANTE */
+.df-hero-context-menu {
+  position: absolute;
+  width: 140px;
+  background: rgba(15, 15, 15, 0.95);
+  border: 2px solid #453530;
+  border-radius: 4px;
+  padding: 8px 0;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9);
+  z-index: 600;
+  transition: transform 0.12s ease;
+  font-family: 'Cinzel', serif;
+}
+
+.df-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px 6px 12px;
+  border-bottom: 1px solid #302020;
+}
+
+.df-menu-hero-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #e0d0b8;
+  letter-spacing: 1px;
+}
+
+.df-menu-arrow {
+  color: #5c4740;
+  font-size: 12px;
+}
+
+.df-menu-item {
+  position: relative;
+  padding: 8px 16px 8px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #8c7b6d;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.df-menu-item.active {
+  background: #2a1515;
+  color: #f0e6d2;
+  border-left: 3px solid #8b0000;
+  padding-left: 27px; /* Compensa a borda */
+}
+
+/* Cursor Gótico */
+.df-selection-cursor {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: #8b0000;
+  animation: cursorPulse 1s infinite alternate ease-in-out;
+}
+
+@keyframes cursorPulse {
+  0% { opacity: 0.5; text-shadow: 0 0 2px #f00; }
+  100% { opacity: 1; text-shadow: 0 0 8px #f00; }
+}
+
+/* HUD INFERIOR */
+.df-bottom-left-hud {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  z-index: 500;
+}
+
+/* Medidor de Tensão / Penitência */
+.df-tension-gauge {
+  position: relative;
+  width: 24px;
+  height: 140px;
+  background: #0f0a0a;
+  border: 2px solid #5a4b3d;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.8), inset 0 0 10px rgba(139, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.df-tension-fill {
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(to top, #4a0000, #b22222);
+  transition: height 0.3s ease;
+  box-shadow: 0 0 10px #ff0000;
+}
+
+.df-tension-text {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 10px;
+  color: #c9b39a;
+  letter-spacing: 1px;
+}
+
+.df-party-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.df-hero-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(10, 8, 8, 0.95);
+  border: 1px solid #3d2a2a;
+  border-left: 4px solid #5a4b3d;
+  padding: 6px 14px 6px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
+}
+
+.df-hero-avatar {
+  width: 32px;
+  height: 32px;
+  background: #1a1a1a;
+  border: 1px solid #5a4b3d;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.joseph-avatar {
+  background: url('/assets/sprites/sprite_joseph.png') center top/cover no-repeat;
+}
+
+.rhogar-avatar {
+  background: url('/assets/sprites/sprite_rhogar.png') center top/cover no-repeat;
+}
+
+.alicia-avatar {
+  background: url('/assets/sprites/sprite_alicia.png') center top/cover no-repeat;
+}
+
+.df-stat-bars-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.df-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'EB Garamond', serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.df-stat-label-hp {
+  color: #b33;
+  width: 20px;
+  font-family: 'Cinzel', serif;
+}
+
+.df-stat-val-hp {
+  color: #e0d0b8;
+  width: 28px;
+  text-align: right;
+}
+
+.df-bar-track-hp {
+  width: 90px;
+  height: 4px;
+  background: #201010;
+}
+
+.df-bar-fill-hp {
+  height: 100%;
+  background: #b22222;
+  box-shadow: 0 0 5px #8b0000;
+}
+
+.df-stat-label-mp {
+  color: #4682b4;
+  width: 20px;
+  font-family: 'Cinzel', serif;
+}
+
+.df-stat-val-mp {
+  color: #e0d0b8;
+  width: 28px;
+  text-align: right;
+}
+
+.df-bar-track-mp {
+  width: 90px;
+  height: 4px;
+  background: #0a1520;
+}
+
+.df-bar-fill-mp {
+  height: 100%;
+  background: #4682b4;
+}
+
+/* LOCKS E CONTADORES */
+.df-enemy-lock-box {
+  position: absolute;
+  top: -70px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  pointer-events: none;
+  z-index: 500;
+}
+
+.df-lock-pwr-label {
+  font-family: 'Cinzel', serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #c9b39a;
+  text-shadow: 0 2px 4px #000;
+  letter-spacing: 1px;
+}
+
+.df-locks-grid {
+  display: flex;
+  gap: 4px;
+  background: rgba(10, 5, 5, 0.95);
+  border: 1px solid #5a4b3d;
+  padding: 4px 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.9);
+}
+
+.df-lock-badge {
+  width: 24px;
+  height: 24px;
+  background: #1a1111;
+  border: 1px solid #4a2a2a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: #b22222;
+}
+
+.df-lock-badge.broken {
+  opacity: 0.3;
+  text-decoration: line-through;
+  filter: grayscale(1) brightness(0.5);
+}
+
+.df-turn-countdown-circle {
+  width: 22px;
+  height: 22px;
+  background: #000;
+  border: 1px solid #b22222;
+  color: #f00;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 900;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 10px #b22222;
+  margin-top: 2px;
+}
+
+/* ENTIDADES */
+.df-entity {
+  position: absolute;
+  transform-origin: bottom center;
+  z-index: 30;
+}
+
+.df-entity .df-shadow {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  filter: blur(2px);
+  z-index: -1;
+}
+
+.df-golem-sprite {
+  width: 140px;
+  height: 140px;
+  background: url('/assets/sprites/sprite_ice_golem.png') center/cover no-repeat;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)) sepia(0.3) brightness(0.8);
+}
+
+.df-hero-sprite {
+  width: 100px;
+  height: 100px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.7)) sepia(0.2) brightness(0.9);
+}
+
+.df-hero-sprite.joseph {
+  background: url('/assets/sprites/sprite_joseph.png') center/cover no-repeat;
+}
+
+.df-hero-sprite.rhogar {
+  background: url('/assets/sprites/sprite_rhogar.png') center/cover no-repeat;
+}
+
+.df-hero-sprite.alicia {
+  background: url('/assets/sprites/sprite_alicia.png') center/cover no-repeat;
+}

@@ -45,77 +45,20 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  background: 
-    /* Parede rochosa escura superior com veios de gelo azul */
-    radial-gradient(circle at 25% 15%, rgba(0, 229, 255, 0.15) 0%, transparent 40%),
-    linear-gradient(180deg, #090c14 0%, #111722 35%, #182232 50%, #202d3f 65%, #141c2a 100%);
+  background: url('/assets/scenarios/bg_sea_of_stars_plateau.jpg') center/cover no-repeat;
+  image-rendering: pixelated;
   overflow: hidden;
 }
 
-/* Paredes Rochosas Escuras com Degraus e Blocos */
-.sos-rock-wall-top {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 240px;
-  background-color: #121924;
-  background-image: 
-    /* Blocos de pedra com neve no topo */
-    linear-gradient(180deg, #e8f0f8 0px, #e8f0f8 12px, #202b3c 13px, #121924 35px),
-    radial-gradient(ellipse at 75% 40%, #00e5ff 0%, transparent 12%),
-    repeating-linear-gradient(90deg, transparent 0, transparent 48px, rgba(0,0,0,0.5) 49px, rgba(0,0,0,0.5) 51px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.85);
-  z-index: 5;
-}
-
-/* Rachadura com Cristais de Energia na Parede Superior */
-.sos-crystal-fissure {
-  position: absolute;
-  top: 60px;
-  left: 210px;
-  width: 45px;
-  height: 90px;
-  background: linear-gradient(180deg, #00e5ff, #1a237e);
-  clip-path: polygon(40% 0%, 70% 30%, 30% 65%, 60% 100%, 40% 100%, 15% 60%, 55% 30%);
-  filter: drop-shadow(0 0 10px #00e5ff);
-  animation: crystalPulse 2.5s infinite alternate ease-in-out;
-  z-index: 6;
-}
-
-@keyframes crystalPulse {
-  0% { opacity: 0.6; filter: drop-shadow(0 0 4px #00e5ff); }
-  100% { opacity: 1; filter: drop-shadow(0 0 16px #00e5ff); }
-}
-
-/* Platô de Neve Central (Chão de Combate) */
+/* Platô de Neve Central (Chão de Combate - invisivel para manter posições) */
 .sos-snow-plateau {
   position: absolute;
   top: 210px;
   left: 80px;
   width: 864px;
   height: 320px;
-  background: 
-    /* Faixas de gelo transparente no chão como na imagem */
-    linear-gradient(90deg, transparent 0, rgba(140, 210, 240, 0.25) 120px, rgba(140, 210, 240, 0.25) 540px, transparent 660px),
-    /* Camada de neve fofa clara */
-    radial-gradient(ellipse at 50% 50%, #f0f6fc 0%, #d8e5f2 60%, #b8cbdd 100%);
-  border-radius: 20px 20px 60px 60px;
-  box-shadow: inset 0 6px 16px rgba(255, 255, 255, 0.9), 0 12px 30px rgba(0, 0, 0, 0.7);
+  background: transparent;
   z-index: 10;
-}
-
-/* Rastro de Gelo / Pista Translúcida */
-.sos-ice-track {
-  position: absolute;
-  top: 70px;
-  left: 140px;
-  width: 520px;
-  height: 75px;
-  border: 2px dashed rgba(110, 190, 230, 0.6);
-  background: rgba(185, 230, 255, 0.28);
-  border-radius: 8px;
-  pointer-events: none;
 }
 
 /* Pinheiros Nevados em Pixel Art ao Redor da Arena */
@@ -478,13 +421,28 @@
 
 /* Guardião de Pedra / Golem */
 .sos-golem-sprite {
-  width: 96px;
-  height: 110px;
+  width: 140px;
+  height: 140px;
+  background: url('/assets/sprites/sprite_ice_golem.png') center/cover no-repeat;
+  image-rendering: pixelated;
   filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));
 }
 
 .sos-hero-sprite {
-  width: 58px;
-  height: 68px;
+  width: 100px;
+  height: 100px;
+  image-rendering: pixelated;
   filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+
+.sos-hero-sprite.joseph {
+  background: url('/assets/sprites/sprite_joseph.png') center/cover no-repeat;
+}
+
+.sos-hero-sprite.rhogar {
+  background: url('/assets/sprites/sprite_rhogar.png') center/cover no-repeat;
+}
+
+.sos-hero-sprite.alicia {
+  background: url('/assets/sprites/sprite_alicia.png') center/cover no-repeat;
 }

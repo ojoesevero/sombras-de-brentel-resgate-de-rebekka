@@ -106,55 +106,30 @@ export class SeaOfStarsCombatScene {
 
         <!-- Palco Principal (Cenário do Platô Nevado e Rochoso 3/4) -->
         <div class="sos-arena-stage">
-          <!-- Parede Rochosa Escura Superior -->
-          <div class="sos-rock-wall-top">
-            <div class="sos-crystal-fissure"></div>
-          </div>
 
-          <!-- Pinheiros Nevados em Pixel Art ao Redor -->
-          <div class="sos-pine-tree" style="top: 80px; left: 18px;">
-            ${this._createPineTreeSvg(85)}
-          </div>
-          <div class="sos-pine-tree" style="top: 240px; left: 6px;">
-            ${this._createPineTreeSvg(110)}
-          </div>
-          <div class="sos-pine-tree" style="top: 140px; right: 28px;">
-            ${this._createPineTreeSvg(120)}
-          </div>
-          <div class="sos-pine-tree" style="top: 280px; right: 12px;">
-            ${this._createPineTreeSvg(135)}
-          </div>
-
-          <!-- Platô de Neve Central com Pista Translúcida de Gelo -->
+          <!-- Platô de Neve Central (Mantém as posições originais) -->
           <div class="sos-snow-plateau">
-            <div class="sos-ice-track"></div>
 
             <!-- Entidade: Herói Superior (Joseph Sylven) -->
-            <div class="sos-entity" id="sos-hero-joseph" style="top: 40px; left: 160px;">
+            <div class="sos-entity" id="sos-hero-joseph" style="top: -10px; left: 160px;">
               <div class="sos-shadow"></div>
-              <div class="sos-hero-sprite">
-                ${SvgAssetFactory.createJosephSvg()}
-              </div>
+              <div class="sos-hero-sprite joseph"></div>
             </div>
 
             <!-- Entidade: Herói Central (Rhogar Tordan) -->
-            <div class="sos-entity" id="sos-hero-rhogar" style="top: 105px; left: 190px;">
+            <div class="sos-entity" id="sos-hero-rhogar" style="top: 75px; left: 190px;">
               <div class="sos-shadow"></div>
-              <div class="sos-hero-sprite">
-                ${SvgAssetFactory.createRhogarSvg()}
-              </div>
+              <div class="sos-hero-sprite rhogar"></div>
             </div>
 
             <!-- Entidade: Herói Inferior (Alicia Lavdik) -->
-            <div class="sos-entity" id="sos-hero-alicia" style="top: 175px; left: 160px;">
+            <div class="sos-entity" id="sos-hero-alicia" style="top: 145px; left: 160px;">
               <div class="sos-shadow"></div>
-              <div class="sos-hero-sprite">
-                ${this._createAliciaSvg()}
-              </div>
+              <div class="sos-hero-sprite alicia"></div>
             </div>
 
             <!-- Inimigo 1: Guardião de Pedra / Golem Superior -->
-            <div class="sos-entity" id="sos-enemy-golem-top" style="top: 15px; left: 520px;">
+            <div class="sos-entity" id="sos-enemy-golem-top" style="top: -25px; left: 520px;">
               <div class="sos-shadow" style="width: 70px;"></div>
               <!-- Caixa de Locks Flutuante sobre o Monstro (Sea of Stars Style) -->
               <div class="sos-enemy-lock-box" id="sos-lock-box-top">
@@ -167,13 +142,11 @@ export class SeaOfStarsCombatScene {
                 </div>
                 <div class="sos-turn-countdown-circle">3</div>
               </div>
-              <div class="sos-golem-sprite">
-                ${this._createIceGolemSvg()}
-              </div>
+              <div class="sos-golem-sprite"></div>
             </div>
 
             <!-- Inimigo 2: Guardião de Pedra / Golem Inferior -->
-            <div class="sos-entity" id="sos-enemy-golem-bottom" style="top: 165px; left: 580px;">
+            <div class="sos-entity" id="sos-enemy-golem-bottom" style="top: 125px; left: 580px;">
               <div class="sos-shadow" style="width: 70px;"></div>
               <div class="sos-enemy-lock-box" id="sos-lock-box-bottom">
                 <span class="sos-lock-pwr-label">PWR 100%</span>
@@ -183,9 +156,7 @@ export class SeaOfStarsCombatScene {
                 </div>
                 <div class="sos-turn-countdown-circle">1</div>
               </div>
-              <div class="sos-golem-sprite">
-                ${this._createIceGolemSvg()}
-              </div>
+              <div class="sos-golem-sprite"></div>
             </div>
           </div>
         </div>
