@@ -4,6 +4,7 @@ import { globalSaveService } from '../services/SaveService';
 import { GsapBattleArena } from '../combat-gsap/GsapBattleArena';
 import { TavernHub } from '../tavern-gsap/TavernHub';
 import { ForestWorldEngine } from '../rendering/ForestWorldEngine';
+import { SeaOfStarsCombatScene } from '../rendering/SeaOfStarsCombatScene';
 
 interface MenuOption {
   text: string;
@@ -66,6 +67,7 @@ export class MainMenuScene extends BaseScene {
     }
 
     this.options.push(
+      { text: '★ Arena Sea of Stars [Fidelidade Exata & Locks]', action: () => this._startSeaOfStars() },
       { text: '★ Estrada da Floresta [100% HTML/CSS/SVG Procedural]', action: () => this._startForestWorld() },
       { text: hasSave ? '1. Retornar à Taverna [GSAP]' : '1. Nova Aventura: Taverna Cauda do Dragão [GSAP]', action: () => this._startTavernHub() },
       { text: '2. Arena de Combate por Turnos (Phaser)', scene: 'BattlePrototypeScene' },
@@ -235,6 +237,20 @@ export class MainMenuScene extends BaseScene {
     }
     const forest = new ForestWorldEngine();
     forest.start(() => {
+      if (gameContainer) {
+        gameContainer.style.display = 'flex';
+      }
+      this.scene.restart();
+    });
+  }
+
+  private _startSeaOfStars(): void {
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) {
+      gameContainer.style.display = 'none';
+    }
+    const sos = new SeaOfStarsCombatScene();
+    sos.start(() => {
       if (gameContainer) {
         gameContainer.style.display = 'flex';
       }

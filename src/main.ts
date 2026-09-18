@@ -4,6 +4,7 @@ import { applyIntegerScaleToGame } from './config/pixelScale';
 import { GsapBattleArena } from './combat-gsap/GsapBattleArena';
 import { TavernHub } from './tavern-gsap/TavernHub';
 import { ForestWorldEngine } from './rendering/ForestWorldEngine';
+import { SeaOfStarsCombatScene } from './rendering/SeaOfStarsCombatScene';
 
 // Inicializa a instância principal do jogo Phaser
 const game = new Phaser.Game(gameConfig);
@@ -15,7 +16,14 @@ window.addEventListener('load', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const mode = urlParams.get('mode');
 
-  if (mode === 'forest') {
+  if (mode === 'sea-of-stars') {
+    const gameContainer = document.getElementById('game-container');
+    if (gameContainer) gameContainer.style.display = 'none';
+    const sos = new SeaOfStarsCombatScene();
+    sos.start(() => {
+      if (gameContainer) gameContainer.style.display = 'flex';
+    });
+  } else if (mode === 'forest') {
     const gameContainer = document.getElementById('game-container');
     if (gameContainer) gameContainer.style.display = 'none';
     const forest = new ForestWorldEngine();

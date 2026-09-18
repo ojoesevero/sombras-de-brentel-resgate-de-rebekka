@@ -1,0 +1,490 @@
+/* ==========================================================================
+   SEA OF STARS COMBAT SYSTEM - EXACT PIXEL ART RECREATION & UI
+   Fidelidade visual, layout e mecânica fiel à imagem de referência
+   ========================================================================== */
+
+#sea-of-stars-container {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #03060a;
+  overflow: hidden;
+  font-family: 'Outfit', monospace, sans-serif;
+  user-select: none;
+  z-index: 200;
+}
+
+#sea-of-stars-container.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Viewport 16:9 Estilo Sea of Stars com Escala Nítida */
+.sos-viewport {
+  position: relative;
+  width: 1024px;
+  height: 576px;
+  max-width: 100vw;
+  max-height: 100vh;
+  aspect-ratio: 16 / 9;
+  background: #0d121c;
+  overflow: hidden;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.95), 0 0 20px rgba(0, 229, 255, 0.2);
+  border: 2px solid #1c2738;
+}
+
+/* --------------------------------------------------------------------------
+   CENÁRIO EM PLATÔ ELEVADO (NEVE, ROCHAS EM DEGRAUS E PINHEIROS)
+   -------------------------------------------------------------------------- */
+
+.sos-arena-stage {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: 
+    /* Parede rochosa escura superior com veios de gelo azul */
+    radial-gradient(circle at 25% 15%, rgba(0, 229, 255, 0.15) 0%, transparent 40%),
+    linear-gradient(180deg, #090c14 0%, #111722 35%, #182232 50%, #202d3f 65%, #141c2a 100%);
+  overflow: hidden;
+}
+
+/* Paredes Rochosas Escuras com Degraus e Blocos */
+.sos-rock-wall-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 240px;
+  background-color: #121924;
+  background-image: 
+    /* Blocos de pedra com neve no topo */
+    linear-gradient(180deg, #e8f0f8 0px, #e8f0f8 12px, #202b3c 13px, #121924 35px),
+    radial-gradient(ellipse at 75% 40%, #00e5ff 0%, transparent 12%),
+    repeating-linear-gradient(90deg, transparent 0, transparent 48px, rgba(0,0,0,0.5) 49px, rgba(0,0,0,0.5) 51px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.85);
+  z-index: 5;
+}
+
+/* Rachadura com Cristais de Energia na Parede Superior */
+.sos-crystal-fissure {
+  position: absolute;
+  top: 60px;
+  left: 210px;
+  width: 45px;
+  height: 90px;
+  background: linear-gradient(180deg, #00e5ff, #1a237e);
+  clip-path: polygon(40% 0%, 70% 30%, 30% 65%, 60% 100%, 40% 100%, 15% 60%, 55% 30%);
+  filter: drop-shadow(0 0 10px #00e5ff);
+  animation: crystalPulse 2.5s infinite alternate ease-in-out;
+  z-index: 6;
+}
+
+@keyframes crystalPulse {
+  0% { opacity: 0.6; filter: drop-shadow(0 0 4px #00e5ff); }
+  100% { opacity: 1; filter: drop-shadow(0 0 16px #00e5ff); }
+}
+
+/* Platô de Neve Central (Chão de Combate) */
+.sos-snow-plateau {
+  position: absolute;
+  top: 210px;
+  left: 80px;
+  width: 864px;
+  height: 320px;
+  background: 
+    /* Faixas de gelo transparente no chão como na imagem */
+    linear-gradient(90deg, transparent 0, rgba(140, 210, 240, 0.25) 120px, rgba(140, 210, 240, 0.25) 540px, transparent 660px),
+    /* Camada de neve fofa clara */
+    radial-gradient(ellipse at 50% 50%, #f0f6fc 0%, #d8e5f2 60%, #b8cbdd 100%);
+  border-radius: 20px 20px 60px 60px;
+  box-shadow: inset 0 6px 16px rgba(255, 255, 255, 0.9), 0 12px 30px rgba(0, 0, 0, 0.7);
+  z-index: 10;
+}
+
+/* Rastro de Gelo / Pista Translúcida */
+.sos-ice-track {
+  position: absolute;
+  top: 70px;
+  left: 140px;
+  width: 520px;
+  height: 75px;
+  border: 2px dashed rgba(110, 190, 230, 0.6);
+  background: rgba(185, 230, 255, 0.28);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* Pinheiros Nevados em Pixel Art ao Redor da Arena */
+.sos-pine-tree {
+  position: absolute;
+  pointer-events: none;
+  z-index: 40;
+}
+
+/* --------------------------------------------------------------------------
+   BARRA SUPERIOR: DESCRIÇÃO DA AÇÃO E EFEITO (EFFECT)
+   -------------------------------------------------------------------------- */
+
+.sos-top-action-bar {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 820px;
+  height: 44px;
+  background: rgba(14, 21, 32, 0.95);
+  border: 2px solid #29384d;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: 500;
+}
+
+.sos-action-name {
+  font-family: 'Outfit', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.sos-action-effect-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sos-effect-label {
+  font-size: 11px;
+  font-weight: 800;
+  color: #8da4be;
+  letter-spacing: 1px;
+}
+
+.sos-effect-icon-box {
+  width: 28px;
+  height: 28px;
+  background: #1f2b3c;
+  border: 1.5px solid #4a617d;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 15px;
+  color: #a8d5e5;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   MENU CONTEXTUAL FLUTUANTE AO LADO DO HERÓI ATIVO (COM LUVA BRANCA)
+   -------------------------------------------------------------------------- */
+
+.sos-hero-context-menu {
+  position: absolute;
+  width: 130px;
+  background: #111a26;
+  border: 2px solid #2b3b50;
+  border-radius: 8px;
+  padding: 6px 0;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.85);
+  z-index: 600;
+  transition: transform 0.12s ease;
+}
+
+.sos-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 12px 6px 12px;
+  border-bottom: 1px solid #1f2d40;
+}
+
+.sos-menu-hero-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.sos-menu-arrow {
+  color: #8da4be;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.sos-menu-item {
+  position: relative;
+  padding: 6px 16px 6px 28px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #9ab0c7;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sos-menu-item.active {
+  background: #19527a;
+  color: #ffffff;
+}
+
+/* Luva Branca de Seleção de Sea of Stars */
+.sos-selection-glove {
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 17px;
+  animation: gloveNudge 0.5s infinite alternate ease-in-out;
+}
+
+@keyframes gloveNudge {
+  0% { transform: translateY(-50%) translateX(0); }
+  100% { transform: translateY(-50%) translateX(3px); }
+}
+
+/* --------------------------------------------------------------------------
+   INFERIOR ESQUERDO: STATUS DA EQUIPE (RETRATOS, HP, MP) E COMBO DIAMOND
+   -------------------------------------------------------------------------- */
+
+.sos-bottom-left-hud {
+  position: absolute;
+  bottom: 20px;
+  left: 24px;
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  z-index: 500;
+}
+
+/* Medidor de Combo em Diamante (Combo Max) */
+.sos-combo-diamond {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  background: #141c28;
+  border: 3px solid #d4a359;
+  transform: rotate(45deg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 15px rgba(212, 163, 89, 0.4), inset 0 0 8px rgba(212, 163, 89, 0.3);
+}
+
+.sos-combo-diamond-text {
+  transform: rotate(-45deg);
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-weight: 900;
+  font-size: 10px;
+  color: #ffd54f;
+  line-height: 1.1;
+  text-shadow: 0 1px 4px #000;
+}
+
+/* Lista de Cards dos 3 Heróis */
+.sos-party-status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sos-hero-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(14, 21, 32, 0.9);
+  border: 2px solid #233144;
+  border-radius: 6px;
+  padding: 4px 14px 4px 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.75);
+}
+
+.sos-hero-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  background: #25364b;
+  border: 1.5px solid #607d8b;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sos-stat-bars-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sos-stat-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.sos-stat-label-hp {
+  color: #e67e22;
+  width: 20px;
+}
+
+.sos-stat-val-hp {
+  color: #ffffff;
+  width: 24px;
+  text-align: right;
+}
+
+.sos-bar-track-hp {
+  width: 80px;
+  height: 6px;
+  background: #2b1f15;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sos-bar-fill-hp {
+  height: 100%;
+  background: linear-gradient(90deg, #f39c12, #e67e22);
+  box-shadow: 0 0 6px #e67e22;
+}
+
+.sos-stat-label-mp {
+  color: #9b59b6;
+  width: 20px;
+}
+
+.sos-stat-val-mp {
+  color: #ffffff;
+  width: 24px;
+  text-align: right;
+}
+
+.sos-bar-track-mp {
+  width: 80px;
+  height: 6px;
+  background: #22182b;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sos-bar-fill-mp {
+  height: 100%;
+  background: linear-gradient(90deg, #bb86fc, #9b59b6);
+  box-shadow: 0 0 6px #9b59b6;
+}
+
+/* --------------------------------------------------------------------------
+   SISTEMA DE LOCKS DE FRAQUEZA E CONTADOR DE TURNOS DO INIMIGO
+   -------------------------------------------------------------------------- */
+
+.sos-enemy-lock-box {
+  position: absolute;
+  top: -65px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 500;
+}
+
+.sos-lock-pwr-label {
+  font-size: 9px;
+  font-weight: 900;
+  color: #ffcc80;
+  text-shadow: 0 1px 3px #000;
+  letter-spacing: 0.5px;
+}
+
+.sos-locks-grid {
+  display: flex;
+  gap: 4px;
+  background: rgba(14, 21, 32, 0.92);
+  border: 1.5px solid #4a617d;
+  border-radius: 6px;
+  padding: 3px 6px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+}
+
+.sos-lock-badge {
+  width: 22px;
+  height: 22px;
+  background: #1a2433;
+  border: 1px solid #455a64;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 13px;
+  color: #80deea;
+}
+
+.sos-lock-badge.broken {
+  opacity: 0.2;
+  text-decoration: line-through;
+  filter: grayscale(1);
+}
+
+.sos-turn-countdown-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #c62828;
+  border: 1.5px solid #ff8a80;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 8px #c62828;
+  margin-top: -2px;
+}
+
+/* --------------------------------------------------------------------------
+   ENTIDADES NO PLATÔ (HERÓIS E GUARDIÕES DE PEDRA / GOLEM)
+   -------------------------------------------------------------------------- */
+
+.sos-entity {
+  position: absolute;
+  transform-origin: bottom center;
+  z-index: 30;
+}
+
+.sos-entity .sos-shadow {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 12px;
+  background: rgba(10, 18, 30, 0.6);
+  border-radius: 50%;
+  filter: blur(1.5px);
+  z-index: -1;
+}
+
+/* Guardião de Pedra / Golem */
+.sos-golem-sprite {
+  width: 96px;
+  height: 110px;
+  filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));
+}
+
+.sos-hero-sprite {
+  width: 58px;
+  height: 68px;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
